@@ -1,16 +1,16 @@
-📚✨ StudyFlow
-🧠 Sistema de Planejamento de Estudos
+<h2><b>StudyFlow
+</b></h2>
 
-O StudyFlow é um sistema web de planejamento de estudos que auxilia estudantes na organização de tarefas, controle de tempo e acompanhamento de produtividade.
+O <b>Study Flow</b> é um sistema web de planejamento de estudos que auxilia estudantes na organização de tarefas, controle de tempo e acompanhamento de produtividade.
 
-🚀 Funcionalidades
-🔐 Cadastro e login de usuários
-📚 Cadastro de tarefas de estudo
-🗂️ Organização por matéria
-📅 Visualização de tarefas do dia
-✔️ Marcar tarefas como concluídas
-🗑️ Exclusão de tarefas
-🔎 Filtro por matéria
+<h3> -- Funcionalidades </h3>
+🔐 Cadastro e login de usuários <br>
+📚 Cadastro de tarefas de estudo<br>
+🗂️ Organização por matéria <br>
+📅 Visualização de tarefas do dia <br>
+✔️ Marcar tarefas como concluídas <br>
+🗑️ Exclusão de tarefas <br>
+🔎 Filtro por matéria <br>
 📊 Dashboard com indicadores de progresso
 
 
