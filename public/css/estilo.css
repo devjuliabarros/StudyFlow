@@ -7,6 +7,12 @@
     font-family: "Poppins", sans-serif;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
 /* Header */
 
 header {
@@ -51,6 +57,7 @@ header {
 }
 
 /* Banner */
+
 #banner {
     background-image: 
     url('/assets/imgs/Banner.png');
@@ -86,7 +93,7 @@ header {
 
 button {
     background-color: #FFD6E8;
-    padding: 20px;
+    padding: 15px;
     border-radius: 20px;
     border: none;
     box-shadow: 0 3px 4px rgba(0, 0, 0, 0.25);
@@ -312,6 +319,119 @@ button:hover {
 #faq .card p {
     font-size: 1rem;
     color: #6D6D6D;
+}
+
+/* Login */
+
+.nav button {
+    background-color: #DDD1FE;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    font-weight: 900;
+}
+
+.nav button i {
+    color: #493628;
+    font-size: 1rem;
+}
+
+.nav button a {
+    border-bottom: none !important;
+}
+
+.login {
+    background-image: 
+    url('/assets/imgs/Banner.png');
+    background-color: rgba(197, 227, 255);
+    background-size: contain;
+    background-position: center;
+
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container .card-login {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login h2{
+    font-size: 2rem;
+    text-align: center;
+    color: #493628;
+}
+
+.formulario {
+    background-color: white;
+    border-radius: 20px;
+    border: 1px solid #6D6D6D;
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.25);
+
+    width: 400px;
+    height: 400px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.subtext{
+    font-size: 0.7rem;
+    color: #493628;
+}
+
+.subtext a {
+    text-decoration: none;
+    color: #493628;
+    font-weight: 600;
+}
+
+.campo p {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #493628;
+}
+
+.campo input {
+    color: #6D6D6D;
+
+    outline: 2px solid #FFD6E8;
+    border: none;
+    border-radius: 20px;
+
+    padding: 10px;
+}
+
+.campo input:focus {
+    outline: 2px solid #493628 !important;
+    color: #6D6D6D !important;
+}
+
+.card_erro {
+    font-size: 0.7rem;
+    color: red;
+}
+
+
+.formulario button {
+    width: 150px;
+
+    font-family: 1.5rem;
+    color: #493628;
+    font-weight: 600;
 }
 
 /* Footer */
