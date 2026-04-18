@@ -11,16 +11,16 @@ function listar(req, res) {
 
 function cadastrar(req, res) {
     var nome = req.body.nome;
+    var disciplina = req.body.disciplina;
+    var data = req.body.data;
+    var fkUsuario = req.body.fkUsuario;
 
-    if (nome == undefined) {
-        res.status(400).send("Seu nome está undefined!");
-    }
+    // console.log(nome, disciplina, data, fkUsuario);
+    console.log("BODY:", req.body);
 
-    tarefaModel.cadastrar(nome).then(function(resposta){
-        res.status(200).send("Carro criado com sucesso");
-    }).catch(function(erro){
-        res.status(500).json(erro.sqlMessage);
-    })
+    tarefaModel.cadastrar(nome, disciplina, data, fkUsuario)
+        .then(resultado => res.json(resultado))
+        .catch(erro => res.status(500).json(erro));
 }
 
 module.exports = {

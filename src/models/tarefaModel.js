@@ -8,11 +8,12 @@ function listar() {
     return database.executar(instrucao);
 }
 
-function cadastrar(nome) {
+function cadastrar(nome, disciplina, data, fkUsuario) {
     var instrucao = `
-        INSERT INTO tarefa (nome, disciplina, data, status, fkUsuario) VALUES ('${nome}', '${disciplina}', '${data}', 'pendente', '${fkUsuario}');
+        INSERT INTO tarefa (nome, disciplina, data, status, fkUsuario) 
+        VALUES ('${nome}', '${disciplina}', '${data}', 'pendente', '${fkUsuario}');
     `;
-    console.log("Executando a instrução SQL: \n" + instrucao);
+    console.log(instrucao);
     return database.executar(instrucao);
 }
 
