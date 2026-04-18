@@ -434,6 +434,12 @@ button:hover {
     font-weight: 600;
 }
 
+/* Cadastro */
+
+.card-cadastro .formulario {
+    height: 550px;
+}
+
 /* Footer */
 
 footer {
