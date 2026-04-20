@@ -1,318 +1,555 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="en">
 <head>
-    <link rel="shortcut icon" href="../assets/icon/favicon2.ico" type="image/x-icon">
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AquaTech | Dashboards</title>
-
-    
-    <link rel="stylesheet" href="./../css/dashboards.css">
-    <link rel="stylesheet" href="./../css/estilo.css" />
-    <script src="../js/sessao.js"></script>
-    <script src="./../js/alerta.js"></script>
-
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-        rel="stylesheet">
-
-    <!-- scripts do Chart.js - 2022-1 -->
+    <title>StudyFlow - Painel</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="shortcut icon" href="../assets/icon/favicon.svg" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!--FONT AWESOME-->
-    <script src="https://kit.fontawesome.com/9f7414eb10.js" crossorigin="anonymous"></script>
 </head>
-
-<!-- <body onload=" atualizarFeed()"> -->
-
 <body>
+    <section>
+    <div class="dashboard">
+        <header>
+            <div class="topo">
+                <div class="logo">
+                    <img src="../assets/icon/studyflow.svg" alt="Logo">
+                    <h2>StudyFlow</h2>
+                </div>
 
-    <div class="janela">
-        <div class="header-left">
-            <h1>AquaTech</h1>
-
-            <div class="hello">
-                <h3>Olá, <span id="b_usuario">usuário</span>!</h3>
+                <div class="user">
+                    <p id="nomeUsuario">Olá, Usuario</p>
+                </div>
             </div>
 
-            <div class="btn-nav-white">
-                <a href="./cards.html">
-                    <h3>Aquários</h3>
-                </a>
+            <div class="nav">
+                <ul>
+                    <li><a href="#">Perfil</a></li>
+                    <li class="agora"><a href="dashboard2.html">Painel</a></li>
+                </ul>
             </div>
 
-            <div class="btn-nav">
+            <a href="../login.html">Sair</a>
+        </header> 
+        
+        <div class="dashboard-container">
+                <div class="left">
+                    <div class="title">
+                        <h3>Meu Painel</h3>
+                    </div>
+                    <div class="cards">
+                    <div class="card">
+                        <h4>Tarefas Pendentes</h4>
+                        <p id="pendentesQtd">0</p>
+                    </div>
 
-                <h3>Gráficos</h3>
+                    <div class="card">
+                        <h4>Tarefas em Andamento</h4>
+                        <p id="andamentoQtd">0</p>
+                    </div>
 
-            </div>
+                    <div class="card">
+                        <h4>Tarefas Concluídas</h4>
+                        <p id="concluidasQtd">0</p>
+                    </div>
+                    </div>
 
-            <div class="btn-nav-white">
-                <a href="./mural.html">
-                    <h3>Mural de Avisos</h3>
-                </a>
-            </div>
+                    <div class="middle">
+                    <div class="to-do">
+                        <h4>Tarefas do Dia</h4>
+                        <div id="tarefasHoje"></div>
+                    </div>
 
-            <div class="btn-logout" onclick="limparSessao()">
-                <h3>Sair</h3>
-            </div>
+                    <div class="task-list">
+                    <div class="top">
+                        <h4>Minhas Tarefas</h4>
+                            <button onclick="abrirModal()"> Adicionar
+                        </button>
+                    </div>
 
-        </div>
+                        <div id="todasTarefas"></div>
+                    </div>
+                    </div>
+                </div>
 
-        <div class="dash">
-            <div id="alerta">
-            </div>
+                <div class="right">
+                    <div class="graphics">
+                    <div class="graphic">
+                        <h3>Tarefas por Semana</h3>
+                        <canvas id="graficoSemana"></canvas>
+                    </div>
 
-            <div class="btns-dash" id="btnAquario">
-                <!-- O gráfico é chamado de acordo com o id (fk_aquario) do banco  -->
-            </div>
-            <div id="graficos">
-            </div>
+                    <div class="graphic">
+                        <h3>Tarefas por Mês</h3>
+                        <canvas id="graficoMes"></canvas>
+                    </div>
+                </div>
+                </div>
         </div>
     </div>
 
+    <!-- Modal de Criar uma Nova Tarefa -->
+    <div id="modalTarefa" class="modal">
+        <div class="modal-content">
+            <h3>Nova Tarefa</h3>
+
+            <input type="text" id="inputNome" placeholder="Nome">
+            <input type="text" id="inputDisciplina" placeholder="Disciplina">
+            <input type="date" id="inputData">
+
+            <div class="buttons">
+            <button onclick="salvarTarefa()">Salvar</button>
+            <button onclick="fecharModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</section>
 
 </body>
-
 </html>
 
 <script>
-    b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
 
-    let proximaAtualizacao;
+    // Função responsável por obter o ID do usuário armazenado no navegador
+    function getUsuario() {
+    
+    // Acessa o sessionStorage (armazenamento temporário do navegador)
+    // e retorna o valor associado à chave "ID_USUARIO"
+    // Esse valor normalmente foi salvo após o login do usuário
 
-    window.onload = exibirAquariosDoUsuario();
+    return sessionStorage.getItem("ID_USUARIO");
+}
 
-    function exibirAquariosDoUsuario() {
-        var aquarios = JSON.parse(sessionStorage.AQUARIOS);
-        aquarios.forEach(item => {
-            document.getElementById("btnAquario").innerHTML += `
-            <button class="btn-chart" onclick="exibirAquario(${item.id})" id="btnAquario${item.id}">${item.descricao}</button>
-            `
+    // Executa funções iniciais após o carregamento completo da página
+    window.addEventListener("load", () => {
+    carregarUsuario();  // Chama a função que carrega os dados do usuário na tela
+    carregarTarefas();  // Chama a função que busca e exibe as tarefas do usuário
+    carregarCards(); // Atualiza os cards (ex: quantidade de tarefas, status, etc.)
+    carregarGraficoSemana(); // Carrega o gráfico com dados da semana
+    carregarGraficoMes(); // Carrega o gráfico com dados do mês
+});
 
-            document.getElementById("graficos").innerHTML += `
-                <div id="grafico${item.id}" class="display-none">
-                    <h3 class="tituloGraficos">
-                        <span id="tituloAquario${item.id}">${item.descricao}</span>
-                    </h3>
-                    <div class="graph">
-                        <canvas id="myChartCanvas${item.id}"></canvas>
-                    </div>
-                    <div class="label-captura">
-                        <p id="avisoCaptura${item.id}" style="color: white"></p>
-                    </div>
-                </div>
-            `
+    // Função responsável por carregar o nome do usuário na tela
+    function carregarUsuario() {
+        // Recupera o nome do usuário armazenado no sessionStorage
+        let nome = sessionStorage.getItem("NOME_USUARIO");
 
-            obterDadosGrafico(item.id)
-        });
+        // Verifica se existe um nome salvo (evita erro ou exibição vazia)
+        if (nome) {
 
-        if (aquarios.length > 0) {
-            exibirAquario(aquarios[0].id)
+            // Seleciona o elemento HTML com id "nomeUsuario"
+            // e insere um texto com o nome do usuário em destaque (negrito)
+            document.getElementById("nomeUsuario").innerHTML = 
+                `Olá, <br> <strong>${nome}</strong>`;
         }
-    }
+}
 
-    function alterarTitulo(idAquario) {
-        var tituloAquario = document.getElementById(`tituloAquario${idAquario}`)
-        var descricao = JSON.parse(sessionStorage.AQUARIOS).find(item => item.id == idAquario).descricao;
-        tituloAquario.innerHTML = "Últimas medidas de Temperatura e Umidade do <span style='color: #e6005a'>" + descricao + "</span>"
-    }
+    // Função responsável por buscar e exibir as tarefas do usuário
+    function carregarTarefas() {
 
-    function exibirAquario(idAquario) {
-        let todosOsGraficos = JSON.parse(sessionStorage.AQUARIOS);
+        // Exibe no console o ID do usuário logado (debug)
+        console.log("USUÁRIO LOGADO:", sessionStorage.getItem("ID_USUARIO"));
 
-        for (i = 0; i < todosOsGraficos.length; i++) {
-            // exibindo - ou não - o gráfico
-            if (todosOsGraficos[i].id != idAquario) {
-                let elementoAtual = document.getElementById(`grafico${todosOsGraficos[i].id}`)
-                if (elementoAtual.classList.contains("display-block")) {
-                    elementoAtual.classList.remove("display-block")
-                }
-                elementoAtual.classList.add("display-none")
+        // Recupera o ID do usuário armazenado na sessão
+        let fkUsuario = sessionStorage.getItem("ID_USUARIO");
 
-                // alterando estilo do botão
-                let btnAtual = document.getElementById(`btnAquario${todosOsGraficos[i].id}`)
-                if (btnAtual.classList.contains("btn-pink")) {
-                    btnAtual.classList.remove("btn-pink")
-                }
-                btnAtual.classList.add("btn-white")
-            }
-        }
+        // Faz uma requisição para o backend buscando as tarefas do usuário
+        fetch(`/tarefas/listar/${fkUsuario}`)
+            
+            .then(res => {
 
-        // exibindo - ou não - o gráfico
-        let graficoExibir = document.getElementById(`grafico${idAquario}`)
-        graficoExibir.classList.remove("display-none")
-        graficoExibir.classList.add("display-block")
+                // Verifica se a resposta da requisição foi bem-sucedida
+                if (!res.ok) throw new Error("Erro ao buscar tarefas");
 
-        // alterando estilo do botão
-        let btnExibir = document.getElementById(`btnAquario${idAquario}`)
-        btnExibir.classList.remove("btn-white")
-        btnExibir.classList.add("btn-pink")
-    }
+                 // Converte a resposta para JSON
+                return res.json();
+            })
 
-    // O gráfico é construído com três funções:
-    // 1. obterDadosGrafico -> Traz dados do Banco de Dados para montar o gráfico da primeira vez
-    // 2. plotarGrafico -> Monta o gráfico com os dados trazidos e exibe em tela
-    // 3. atualizarGrafico -> Atualiza o gráfico, trazendo novamente dados do Banco
+            .then(tarefas => {
 
-    // Esta função *obterDadosGrafico* busca os últimos dados inseridos em tabela de medidas.
-    // para, quando carregar o gráfico da primeira vez, já trazer com vários dados.
-    // A função *obterDadosGrafico* também invoca a função *plotarGrafico*
+                // Exibe no console as tarefas recebidas (debug)
+                console.log("TAREFAS:", tarefas);
 
-    //     Se quiser alterar a busca, ajuste as regras de negócio em src/controllers
-    //     Para ajustar o "select", ajuste o comando sql em src/models
-    function obterDadosGrafico(idAquario) {
+                // Pega a data de hoje no formato YYYY-MM-DD
+                let hoje = new Date().toISOString().split("T")[0];
 
-        alterarTitulo(idAquario)
+                // Pega a data de hoje no formato YYYY-MM-DD
+                let divHoje = document.getElementById("tarefasHoje");
+                let divTodas = document.getElementById("todasTarefas");
 
-        if (proximaAtualizacao != undefined) {
-            clearTimeout(proximaAtualizacao);
-        }
+                 // Limpa o conteúdo atual antes de renderizar novamente
+                divHoje.innerHTML = "";
+                divTodas.innerHTML = "";
 
-        fetch(`/medidas/ultimas/${idAquario}`, { cache: 'no-store' }).then(function (response) {
-            if (response.ok) {
-                response.json().then(function (resposta) {
-                    console.log(`Dados recebidos: ${JSON.stringify(resposta)}`);
-                    resposta.reverse();
+                // Percorre todas as tarefas recebidas
+                tarefas.forEach(tarefa => {
 
-                    plotarGrafico(resposta, idAquario);
+                    // Formata a data da tarefa (ou define como "Sem data")
+                    let dataFormatada = tarefa.data ? tarefa.data.split("T")[0] : "Sem data";
 
-                });
-            } else {
-                console.error('Nenhum dado encontrado ou erro na API');
-            }
-        })
-            .catch(function (error) {
-                console.error(`Erro na obtenção dos dados p/ gráfico: ${error.message}`);
-            });
-    }
+                    // Define o texto do botão com base no status
+                    let acao = "";
 
-    // Esta função *plotarGrafico* usa os dados capturados na função anterior para criar o gráfico
-    // Configura o gráfico (cores, tipo, etc), materializa-o na página e, 
-    // A função *plotarGrafico* também invoca a função *atualizarGrafico*
-    function plotarGrafico(resposta, idAquario) {
+                    // Normaliza o status (remove espaços e deixa minúsculo)
+                    let status = (tarefa.status || "").trim().toLowerCase();
 
-        console.log('iniciando plotagem do gráfico...');
-
-        // Criando estrutura para plotar gráfico - labels
-        let labels = [];
-
-        // Criando estrutura para plotar gráfico - dados
-        let dados = {
-            labels: labels,
-            datasets: [{
-                label: 'Umidade',
-                data: [],
-                fill: false,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            },
-            {
-                label: 'Temperatura',
-                data: [],
-                fill: false,
-                borderColor: 'rgb(199, 52, 52)',
-                tension: 0.1
-            }]
-        };
-
-        console.log('----------------------------------------------')
-        console.log('Estes dados foram recebidos pela funcao "obterDadosGrafico" e passados para "plotarGrafico":')
-        console.log(resposta)
-
-        // Inserindo valores recebidos em estrutura para plotar o gráfico
-        for (i = 0; i < resposta.length; i++) {
-            var registro = resposta[i];
-            labels.push(registro.momento_grafico);
-            dados.datasets[0].data.push(registro.umidade);
-            dados.datasets[1].data.push(registro.temperatura);
-        }
-
-        console.log('----------------------------------------------')
-        console.log('O gráfico será plotado com os respectivos valores:')
-        console.log('Labels:')
-        console.log(labels)
-        console.log('Dados:')
-        console.log(dados.datasets)
-        console.log('----------------------------------------------')
-
-        // Criando estrutura para plotar gráfico - config
-        const config = {
-            type: 'line',
-            data: dados,
-        };
-
-        // Adicionando gráfico criado em div na tela
-        let myChart = new Chart(
-            document.getElementById(`myChartCanvas${idAquario}`),
-            config
-        );
-
-        setTimeout(() => atualizarGrafico(idAquario, dados, myChart), 2000);
-    }
-
-
-    // Esta função *atualizarGrafico* atualiza o gráfico que foi renderizado na página,
-    // buscando a última medida inserida em tabela contendo as capturas, 
-
-    //     Se quiser alterar a busca, ajuste as regras de negócio em src/controllers
-    //     Para ajustar o "select", ajuste o comando sql em src/models
-    function atualizarGrafico(idAquario, dados, myChart) {
-
-
-
-        fetch(`/medidas/tempo-real/${idAquario}`, { cache: 'no-store' }).then(function (response) {
-            if (response.ok) {
-                response.json().then(function (novoRegistro) {
-
-                    obterdados(idAquario);
-                    // alertar(novoRegistro, idAquario);
-                    console.log(`Dados recebidos: ${JSON.stringify(novoRegistro)}`);
-                    console.log(`Dados atuais do gráfico:`);
-                    console.log(dados);
-
-                    let avisoCaptura = document.getElementById(`avisoCaptura${idAquario}`)
-                    avisoCaptura.innerHTML = ""
-
-
-                    if (novoRegistro[0].momento_grafico == dados.labels[dados.labels.length - 1]) {
-                        console.log("---------------------------------------------------------------")
-                        console.log("Como não há dados novos para captura, o gráfico não atualizará.")
-                        avisoCaptura.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> Foi trazido o dado mais atual capturado pelo sensor. <br> Como não há dados novos a exibir, o gráfico não atualizará."
-                        console.log("Horário do novo dado capturado:")
-                        console.log(novoRegistro[0].momento_grafico)
-                        console.log("Horário do último dado capturado:")
-                        console.log(dados.labels[dados.labels.length - 1])
-                        console.log("---------------------------------------------------------------")
-                    } else {
-                        // tirando e colocando valores no gráfico
-                        dados.labels.shift(); // apagar o primeiro
-                        dados.labels.push(novoRegistro[0].momento_grafico); // incluir um novo momento
-
-                        dados.datasets[0].data.shift();  // apagar o primeiro de umidade
-                        dados.datasets[0].data.push(novoRegistro[0].umidade); // incluir uma nova medida de umidade
-
-                        dados.datasets[1].data.shift();  // apagar o primeiro de temperatura
-                        dados.datasets[1].data.push(novoRegistro[0].temperatura); // incluir uma nova medida de temperatura
-
-                        myChart.update();
+                    if (status === "pendente") {
+                        acao = "➡️ Iniciar";
+                    } 
+                    else if (status === "andamento") {
+                        acao = "✔ Concluir";
+                    } 
+                    else if (status === "concluido") {
+                        acao = "🔄 Reabrir";
                     }
 
-                    // Altere aqui o valor em ms se quiser que o gráfico atualize mais rápido ou mais devagar
-                    proximaAtualizacao = setTimeout(() => atualizarGrafico(idAquario, dados, myChart), 2000);
+                    // Monta o HTML da tarefa
+                    let tarefaHTML = `
+                        <div class="tarefa ${tarefa.status}">
+                            <p>${tarefa.nome}</p>
+                            <p>${tarefa.disciplina}</p>
+                            <p>${dataFormatada}</p>
+
+                            <div class="acoes">
+                                <button onclick="toggleStatus(${tarefa.idTarefa}, '${tarefa.status}')">
+                                    ${acao}
+                                </button>
+
+                                <button onclick="deletarTarefa(${tarefa.idTarefa})">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Adiciona a tarefa na lista geral
+                    divTodas.innerHTML += tarefaHTML;
+                    
+                     // Se a tarefa for de hoje, adiciona também na lista "Hoje"
+                    if (dataFormatada === hoje) {
+                        divHoje.innerHTML += tarefaHTML;
+                    }
                 });
-            } else {
-                console.error('Nenhum dado encontrado ou erro na API');
-                // Altere aqui o valor em ms se quiser que o gráfico atualize mais rápido ou mais devagar
-                proximaAtualizacao = setTimeout(() => atualizarGrafico(idAquario, dados, myChart), 2000);
+            })
+            .catch(erro => {
+
+                // Captura e exibe erros no console
+                console.error("Erro ao carregar tarefas:", erro);
+            });
+}
+
+    // Função responsável por alternar (trocar) o status de uma tarefa
+    function toggleStatus(id, statusAtual) {
+
+        // Variável que armazenará o novo status da tarefa
+        let novoStatus;
+
+        // Define o próximo status com base no status atual
+        if (statusAtual === "pendente") {
+            novoStatus = "andamento";  // começa a tarefa
+        } else if (statusAtual === "andamento") {
+            novoStatus = "concluido"; // finaliza a tarefa
+        } else {
+            novoStatus = "pendente"; // reinicia a tarefa
+        }
+
+        // Envia uma requisição para o backend para atualizar o status
+        fetch("/tarefas/status", {
+            method: "PUT", // método HTTP para atualização
+            headers: {
+                "Content-Type": "application/json"  // informa que está enviando JSON
+            },
+            body: JSON.stringify({
+                idTarefa: id, // ID da tarefa que será atualizada
+                status: novoStatus // novo status definido acima
+            })
+        })
+        .then(res => res.text()) // recebe a resposta do servidor
+        .then(() => {
+
+            // espera um micro delay pra garantir update no banco
+            setTimeout(() => {
+
+                // Recarrega os dados da interface após a atualização
+                carregarTarefas();
+                carregarCards();
+                carregarGraficoSemana();
+                carregarGraficoMes();
+
+            }, 100);
+
+        });
+    }   
+
+    // Função responsável por abrir o modal de criação de tarefa
+    function abrirModal() {
+
+        // Seleciona o elemento do modal pelo ID
+        // e altera o display para "flex", tornando-o visível na tela
+        document.getElementById("modalTarefa").style.display = "flex";
+
+        // Obtém a data atual no formato ISO (YYYY-MM-DDTHH:mm:ss)
+        // e separa apenas a parte da data (antes do "T")
+        let hoje = new Date().toISOString().split("T")[0];
+
+        // Define a data atual como valor padrão no input de data
+        document.getElementById("inputData").value = hoje;
+    }
+
+    // Função responsável por fechar o modal de tarefa
+    function fecharModal() {
+
+        // Seleciona o elemento do modal pelo ID
+        // e altera o display para "none", escondendo-o da tela
+        document.getElementById("modalTarefa").style.display = "none";
+    }
+    
+    // Função responsável por coletar os dados do formulário e enviar uma nova tarefa para o backend
+    function salvarTarefa() {
+
+        // Captura os valores digitados nos inputs
+        let nome = document.getElementById("inputNome").value;
+        let disciplina = document.getElementById("inputDisciplina").value;
+        let data = document.getElementById("inputData").value;
+
+        // Recupera o ID do usuário armazenado na sessão
+        let fkUsuario = sessionStorage.getItem("ID_USUARIO");
+
+         // Validação simples: verifica se os campos obrigatórios foram preenchidos
+        if (!nome || !data) {
+            alert("Preencha os campos!");
+            return;
+        }
+
+        // Envia os dados para o backend via requisição HTTP (POST)
+        fetch("/tarefas/cadastrar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json" // informa que o corpo é JSON
+            },
+            body: JSON.stringify({
+                nome: nome,
+                disciplina: disciplina,
+                data: data,
+                fkUsuario: fkUsuario
+            })
+        })
+        .then(async res => {
+
+            // Lê a resposta do servidor como texto
+            let texto = await res.text();
+
+            // Exibe a resposta no console (debug)
+            console.log("RESPOSTA DO SERVIDOR:", texto);
+
+            // Se a resposta não for OK, lança um erro
+            if (!res.ok) {
+                throw new Error(texto);
             }
         })
-            .catch(function (error) {
-                console.error(`Erro na obtenção dos dados p/ gráfico: ${error.message}`);
+        .then(() => {
+
+            // Se deu tudo certo: fecha o modal e atualiza os dados da tela
+            fecharModal();
+            carregarTarefas();
+            carregarCards();
+        })
+        .catch(erro => {
+
+            // Captura e exibe erros no console
+            console.error("Erro:", erro);
+        });
+    }
+
+    // Função responsável por deletar uma tarefa
+    function deletarTarefa(id) {
+
+        // Envia uma requisição para o backend informando qual tarefa deve ser removida
+        fetch("/tarefas/deletar", {
+            method: "DELETE",  // geralmente usado para atualização (pode ser exclusão lógica)
+            headers: {
+                "Content-Type": "application/json" // indica que está enviando JSON
+            },
+            body: JSON.stringify({ idTarefa: id }) // ID da tarefa que será deletada
+        })
+        .then(res => res.text()) // recebe a resposta do servidor
+        .then(() => {
+
+            // Após deletar, atualiza os dados na tela
+            carregarTarefas();
+            carregarCards();
+            carregarGraficoSemana();
+            carregarGraficoMes();
+        });
+    }
+
+    // Função responsável por buscar e atualizar os cards (quantidade por status)
+    async function carregarCards() {
+        try {
+
+            // Recupera o ID do usuário armazenado na sessão
+            let fkUsuario = sessionStorage.getItem("ID_USUARIO");
+
+            // Faz a requisição ao backend para obter a contagem de tarefas por status
+            const resposta = await fetch(`/tarefas/contagem/${fkUsuario}`);
+
+            // Verifica se a resposta foi bem-sucedida
+            if (!resposta.ok) throw new Error("Contagem falhou");
+
+            // Converte a resposta para JSON
+            const dados = await resposta.json();
+
+            // Exibe os dados no console (debug)
+            console.log("CONTAGEM:", dados);
+
+            // Inicializa os contadores
+            let pendente = 0;
+            let andamento = 0;
+            let concluido = 0;
+
+            // Percorre os dados retornados (cada item representa um status)
+            dados.forEach(item => {
+
+                // Normaliza o status (evita erro com maiúsculas/minúsculas)
+                const status = (item.status || "").toLowerCase();
+
+                // Atribui o total correspondente a cada status
+                if (status === "pendente") pendente = item.total;
+                if (status === "andamento") andamento = item.total;
+                if (status === "concluido") concluido = item.total;
             });
 
+            // Atualiza os elementos da tela com os valores obtidos
+            document.getElementById("pendentesQtd").innerText = pendente;
+            document.getElementById("andamentoQtd").innerText = andamento;
+            document.getElementById("concluidasQtd").innerText = concluido;
+
+        } catch (err) {
+
+            // Caso ocorra erro, exibe no console
+            console.log("Cards erro:", err);
+
+            // Define os valores como 0 para evitar quebrar a interface
+            document.getElementById("pendentesQtd").innerText = 0;
+            document.getElementById("andamentoQtd").innerText = 0;
+            document.getElementById("concluidasQtd").innerText = 0;
+        }
     }
+
+    // Função responsável por carregar e renderizar o gráfico de tarefas da semana
+    function carregarGraficoSemana() {
+
+        // Recupera o ID do usuário da sessão
+        let fkUsuario = sessionStorage.getItem("ID_USUARIO");
+
+        // let graficoSemana = null;
+
+        // Faz a requisição ao backend para buscar os dados da semana
+        fetch(`/tarefas/semana/${fkUsuario}`)
+            .then(res => {
+
+                 // Verifica se a resposta foi bem-sucedida
+                if (!res.ok) throw new Error("Erro ao buscar dados semanais");
+
+                // Converte a resposta para JSON
+                return res.json();
+            })
+            .then(dados => {
+
+                // Array com os nomes dos dias da semana (ordem fixa)
+                const nomesDias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+                // Objeto base com valores zerados (garante que todos os dias existam)
+                let valores = {
+                    "Dom": 0,
+                    "Seg": 0,
+                    "Ter": 0,
+                    "Qua": 0,
+                    "Qui": 0,
+                    "Sex": 0,
+                    "Sáb": 0
+                };
+
+                // Preenche os valores com os dados vindos do backend
+                dados.forEach(item => {
+
+                    // item.diaSemana -> nome do dia (ex: "Seg") item.total -> quantidade de tarefas
+                    valores[item.diaSemana] = item.total;
+                });
+
+                // Garante a ordem correta dos dados conforme o array de dias
+                let dadosOrdenados = nomesDias.map(dia => valores[dia]);
+
+                // Se já existir um gráfico anterior, destrói antes de criar outro(evita erro e sobreposição)
+                if (window.graficoSemana?.destroy) {
+                    window.graficoSemana.destroy();
+                }
+
+                // Obtém o contexto do canvas onde o gráfico será renderizado
+                const ctx = document.getElementById("graficoSemana").getContext("2d");
+
+                // Cria um novo gráfico utilizando Chart.js
+                window.graficoSemana = new Chart(ctx, {
+                    type: "bar",
+                    data: {
+                        labels: nomesDias, // rótulos (dias da semana)
+                        datasets: [{
+                            label: "Tarefas Concluídas", // legenda
+                            data: dadosOrdenados, // valores
+                            backgroundColor: "#C5E3FF" // cor das barras
+                        }]
+                    },
+                });
+            })
+            .catch(err => {
+
+                // Exibe erro no console caso a requisição falhe
+                console.error(err);
+            });
+    }
+
+    // Armazena a instância do gráfico mensal
+    let graficoMes = null;
+
+    // Função responsável por carregar e renderizar o gráfico mensal
+    function carregarGraficoMes() {
+
+        // Recupera o ID do usuário da sessão
+        let fkUsuario = sessionStorage.getItem("ID_USUARIO");
+
+        // Faz a requisição ao backend para buscar os dados do mês
+        fetch(`/tarefas/mes/${fkUsuario}`)
+            .then(res => res.json()) // converte a resposta para JSON
+            .then(dados => {
+
+                // Garante que os dados são um array (evita erro)
+                const lista = Array.isArray(dados) ? dados : [];
+
+                // Extrai os meses (labels do gráfico)
+                const labels = lista.map(i => i.mes);
+
+                // Extrai os valores (quantidade de tarefas)
+                const valores = lista.map(i => i.total);
+
+                // Se já existir um gráfico, destrói antes de criar outro
+                if (graficoMes) {
+                    graficoMes.destroy();
+                }
+
+                // Cria o gráfico com Chart.js
+                graficoMes = new Chart(document.getElementById("graficoMes"), {
+                    type: "bar",
+                    data: {
+                        labels, // meses
+                        datasets: [{
+                            label: "Tarefas Concluídas",
+                            data: valores, // valores por mês
+                            backgroundColor: "#D3EBC5"
+                        }]
+                    }
+                });
+            });
+    }      
+
 </script>
+

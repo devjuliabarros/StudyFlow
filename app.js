@@ -6,6 +6,8 @@ var caminho_env = ambiente_processo === 'producao' ? '.env' : '.env.dev';
 // A sintaxe do operador ternário é: condição ? valor_se_verdadeiro : valor_se_falso
 
 require("dotenv").config({ path: caminho_env });
+var tarefaRouter = require("./src/routes/tarefas");
+console.log("ROTA TAREFAS CARREGADA");
 
 var express = require("express");
 var cors = require("cors");
@@ -21,7 +23,7 @@ var usuarioRouter = require("./src/routes/usuarios");
 // var medidasRouter = require("./src/routes/medidas");
 // var aquariosRouter = require("./src/routes/aquarios");
 // var empresasRouter = require("./src/routes/empresas");
-var tarefasRouter = require ("./src/routes/tarefas");
+// var tarefaRouter = require ("./src/routes/tarefas");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -35,7 +37,7 @@ app.use("/usuarios", usuarioRouter);
 // app.use("/medidas", medidasRouter);
 // app.use("/aquarios", aquariosRouter);
 // app.use("/empresas", empresasRouter);
-app.use("/tarefas", tarefasRouter );
+app.use("/tarefas", tarefaRouter );
 
 app.listen(PORTA_APP, function () {
     console.log(`
@@ -53,3 +55,5 @@ app.listen(PORTA_APP, function () {
     \tSe .:producao:. você está se conectando ao banco remoto. \n\n
     \t\tPara alterar o ambiente, comente ou descomente as linhas 1 ou 2 no arquivo 'app.js'\n\n`);
 });
+
+console.log("ROTA TAREFAS CARREGADA");

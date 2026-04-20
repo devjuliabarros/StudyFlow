@@ -64,7 +64,7 @@ function entrar() {
     var senhaVar = document.getElementById("senha_input").value;
 
     if (emailVar == "" || senhaVar == "") {
-        document.getElementById("cardErro").style.display = "block";
+        // document.getElementById("cardErro").style.display = "block";
         document.getElementById("mensagem_erro").innerHTML = "Preencha todos os campos!";
         return;
     }
@@ -87,14 +87,15 @@ function entrar() {
     })
     .then(json => {
         console.log("Login OK:", json);
+        console.log("Login OK:", json);
+        
+        // confere o nome das propriedades que o backend retorna
+        sessionStorage.setItem("ID_USUARIO", json.idUsuario);
+        sessionStorage.setItem("NOME_USUARIO", json.nome);
+        sessionStorage.setItem("EMAIL_USUARIO", json.email);
 
-        // ⚠️ confere o nome das propriedades que o backend retorna
-        sessionStorage.ID_USUARIO = json.idUsuario;
-        sessionStorage.NOME_USUARIO = json.nome;
-        sessionStorage.EMAIL_USUARIO = json.email;
-
-        // redireciona
-        window.location.href = "/index.html";
+        // redireciona para a dashboard após o login
+        window.location.href = "./dashboard/dashboard.html";
     })
     .catch(err => {
         console.log(err);
