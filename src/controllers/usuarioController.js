@@ -1,6 +1,8 @@
+// Importa os models (acesso ao banco)
 var usuarioModel = require("../models/usuarioModel");
-var tarefaModel = require("../models/tarefaModel");
+// var tarefaModel = require("../models/tarefaModel");
 
+// Autenticar o login do usuario
 function autenticar(req, res) {
     var email = req.body.emailServer;
     var senha = req.body.senhaServer;
@@ -34,7 +36,7 @@ function autenticar(req, res) {
             });
     }
 }
-
+// Cadastrar o usuario
 function cadastrar(req, res) {
     // Variável que recupera os valores inseridos pelo usuário no cadastro.html
     var nome = req.body.nomeServer;
@@ -57,7 +59,32 @@ function cadastrar(req, res) {
     }
 }
 
+// Atualizar os dados do usuario
+function atualizar(req, res) {
+
+    // Pega os dados enviados no body
+    const { idUsuario, nome, email, senha } = req.body;
+
+    // Valida se o ID veio (sem ele não dá pra atualizar)
+    if (!idUsuario) {
+        return res.status(400).send("ID do usuário é obrigatório");
+    }
+
+    // Chama a model passando os dados
+    usuarioModel.atualizar(idUsuario, nome, email, senha)
+        .then(() => {
+            // Se deu certo
+            res.status(200).send("Atualizado com sucesso");
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).json(err);
+        });
+}
+
+// Exporta as funções
 module.exports = {
     autenticar,
-    cadastrar
-}
+    cadastrar,
+    atualizar
+};

@@ -111,7 +111,7 @@ header a {
     padding-left: 10px;
 }
 
-.dashboard-container {
+.dashboard-container{
     margin-left: 50px;
     margin-top: 40px;
     display: flex;
@@ -378,4 +378,115 @@ p {
 
 canvas {
     max-width: 100%;
+}
+
+/* Perfil */
+
+.perfil {
+    display: flex;
+    flex-direction: row;
+}
+
+.perfil .title h3{
+    font-size: 1.5rem;
+    color: #493628;
+    border-left: 4px solid #FFD6E8;
+    padding-left: 10px;
+}
+
+.perfil-container{
+    flex: 1;
+    flex-direction: column;
+    display: flex;
+    margin-left: 50px;
+    margin-top: 40px;
+    gap: 60px;
+}
+
+.login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.container .card-login {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login h2{
+    font-size: 2rem;
+    color: #493628;
+    text-align: center;
+}
+
+.formulario {
+    background-color: white;
+    border-radius: 20px;
+    border: 1px solid #6D6D6D;
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.25);
+
+    width: 400px;
+    min-height: 450px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.subtext{
+    font-size: 0.7rem;
+    color: #493628;
+}
+
+.subtext a {
+    text-decoration: none;
+    color: #493628;
+    font-weight: 600;
+}
+
+.campo p {
+    font-size: 1rem !important;
+    font-weight: 600;
+    color: #493628;
+    text-align: left;
+}
+
+.campo input {
+    color: #6D6D6D;
+
+    outline: 2px solid #FFD6E8;
+    border: none;
+    border-radius: 20px;
+
+    padding: 10px;
+}
+
+.campo input:focus {
+    outline: 2px solid #493628 !important;
+    color: #6D6D6D !important;
+}
+
+.card_erro {
+    font-size: 0.7rem;
+    color: red;
+}
+
+
+.formulario button {
+    width: 150px;
+
+    font-family: 1.5rem;
+    color: #493628;
+    font-weight: 600;
 }
