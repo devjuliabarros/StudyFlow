@@ -437,7 +437,7 @@ button:hover {
 /* Cadastro */
 
 .card-cadastro .formulario {
-    height: 550px;
+    height: 550px !important;
 }
 
 /* Footer */
