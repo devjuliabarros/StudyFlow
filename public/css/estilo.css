@@ -420,7 +420,7 @@ button:hover {
     color: #6D6D6D !important;
 }
 
-.card_erro {
+#cardErro {
     font-size: 0.7rem;
     color: red;
 }
@@ -437,7 +437,7 @@ button:hover {
 /* Cadastro */
 
 .card-cadastro .formulario {
-    height: 550px !important;
+    height: 550px;
 }
 
 /* Footer */
@@ -458,4 +458,9 @@ footer p {
     font-size: 1rem;
     color: #493628;
     font-weight: 700;
+}
+
+footer a {
+    color: #493628;
+    text-decoration: none;
 }

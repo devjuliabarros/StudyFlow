@@ -51,9 +51,9 @@
 
             <p class="subtext">Já tem uma conta? <span><a href="login.html">Faça Login</a></span></p>
 
-            <div class="alerta_erro">
+            <div class="alerta_erro" id="cardErro">
                 <span id="mensagem_erro"></span>
-                </div>
+            </div>
                 
                 <button class="botao" onclick="cadastrar()">Cadastrar</button>
             </div>
@@ -76,17 +76,27 @@ function cadastrar() {
 
     cardErro.style.display = "none";
 
+    // Array com todos os campos
+    const campos = [
+        { nome: "Nome", valor: nomeVar },
+        { nome: "Email", valor: emailVar },
+        { nome: "Senha", valor: senhaVar },
+        { nome: "Confirmação de senha", valor: confirmacaoSenhaVar }
+    ];
+
     // Validando se os campos estão todos preenchidos
-    if (nomeVar == "" || emailVar == "" || senhaVar == "" || confirmacaoSenhaVar == "") {
-        cardErro.style.display = "block";
-        mensagem_erro.innerHTML = "Preencha todos os campos!";
-        return;
+    for (let i = 0; i < campos.length; i++) {
+        if (campos[i].valor == "") {
+            cardErro.style.display = "block";
+            mensagem_erro.innerHTML = `Preencha o campo ${campos[i].nome}!`;
+            return;
+        }
     }
 
     // Validando se o nome tem 2 caracteres ou mais
     if (nomeVar.length < 2) {
         cardErro.style.display = "block";
-        mensagem_erro.innerHTML = "Nome inválido!";
+        mensagem_erro.innerHTML = "Nome inválido! (Deve conter 2 caracteres ou mais)";
         return;
     }
 

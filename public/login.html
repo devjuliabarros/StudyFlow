@@ -40,14 +40,11 @@
 
                     <p class="subtext">Ainda não tem uma conta? <span><a href="cadastro.html">Crie uma</a></span></p>
 
-                     <div class="card_erro" id="cardErro">
+                    <div class="alerta_erro" id="cardErro">
                         <span id="mensagem_erro"></span>
                     </div>
 
                     <button onclick="entrar()">Entrar</button>
-                    
-                    <div id="div_erros_login"></div>
-                    <div class="alerta_erro"></div>
 
                 </div>
             </div>
@@ -63,10 +60,21 @@ function entrar() {
     var emailVar = document.getElementById("email_input").value;
     var senhaVar = document.getElementById("senha_input").value;
 
-    if (emailVar == "" || senhaVar == "") {
-        // document.getElementById("cardErro").style.display = "block";
-        document.getElementById("mensagem_erro").innerHTML = "Preencha todos os campos!";
-        return;
+    cardErro.style.display = "none";
+
+    // Array com todos os campos
+    const campos = [
+        { nome: "Email", valor: emailVar },
+        { nome: "Senha", valor: senhaVar },
+    ];
+
+    // Validando se os campos estão todos preenchidos
+    for (let i = 0; i < campos.length; i++) {
+        if (campos[i].valor == "") {
+            cardErro.style.display = "block";
+            mensagem_erro.innerHTML = `Preencha o campo ${campos[i].nome}!`;
+            return;
+        }
     }
 
     fetch("/usuarios/autenticar", {
