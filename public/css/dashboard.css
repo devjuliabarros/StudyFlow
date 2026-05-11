@@ -186,7 +186,7 @@ header a {
 
 .to-do {
     background-color: #FCFD96;
-    width: 400px;
+    width: 550px;
     height: fit-content;
     max-height: 100vh;
     padding: 20px;
@@ -197,7 +197,7 @@ header a {
 
 .task-list {
     background-color: #FFD6E8;
-    width: 490px;
+    width: 550px;
     height: fit-content;
     max-height: 100vh;
     padding: 20px;
@@ -276,6 +276,7 @@ button a {
     border-radius: 10px;
     border: 2px solid #FFD6E8;
     padding: 10px;
+    outline: none;
 }
 
 .modal-content #inputData {
@@ -284,7 +285,7 @@ button a {
 
 .modal-content input:focus {
     color: #6D6D6D;
-    outline-color: #493628;
+    border: 2px solid #493628;
 }
 
 .modal-content .buttons {
@@ -329,7 +330,7 @@ button a {
 }
 
 p {
-    font-size: 0.6rem;
+    font-size: 0.8rem;
     color: #6D6D6D;
 }
 
@@ -358,7 +359,7 @@ p {
 }
 
 .graphic {
-    width: 550px;
+    width: 500px;
     height: fit-content;
     background: #ffffff;
     border: 1px solid #6D6D6D;
@@ -383,6 +384,7 @@ p {
 }
 
 .graphic-header button {
+    width: 50px;
     background-color: #FFD6E8;
 }
 
