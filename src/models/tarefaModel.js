@@ -75,13 +75,17 @@ function contarPorStatus(fkUsuario) {
 }
 
 // Seleciona as tarefas no banco de dados conforme o dia da semana
-function tarefasPorSemana(fkUsuario) {
+// offset 0 = semana atual, -1 = semana passada, etc.
+function tarefasPorSemana(fkUsuario, offset = 0) {
 
     // Agrupa tarefas concluídas por dia da semana
     // DAYOFWEEK retorna números de 1 (Domingo) a 7 (Sábado)
     // O CASE converte para nomes (Dom, Seg, etc.)
+    // O offset desloca o intervalo de datas para semanas anteriores
     var sql = `
         SELECT 
+        -- Converte o número do dia da semana para nome abreviado
+        -- DAYOFWEEK: 1 = Domingo | 7 = Sábado
             CASE 
                 WHEN DAYOFWEEK(data) = 1 THEN 'Dom'
                 WHEN DAYOFWEEK(data) = 2 THEN 'Seg'
@@ -91,12 +95,35 @@ function tarefasPorSemana(fkUsuario) {
                 WHEN DAYOFWEEK(data) = 6 THEN 'Sex'
                 WHEN DAYOFWEEK(data) = 7 THEN 'Sáb'
             END AS diaSemana,
+            
+            -- Conta quantas tarefas concluídas existem em cada dia
             COUNT(*) AS total
+
         FROM tarefa
         WHERE fkUsuario = ${fkUsuario}
         AND status = 'concluido'
         AND data IS NOT NULL
+
+        -- Define a data inicial da semana
+        -- offset:
+        -- 0 = semana atual
+        -- -1 = semana passada
+        -- -2 = duas semanas atrás
+        AND data >= DATE_ADD(
+                DATE_SUB(CURDATE(), INTERVAL DAYOFWEEK(CURDATE()) - 1 DAY),
+                INTERVAL ${offset * 7} DAY
+            )
+
+        -- Define a data final da semana
+        AND data <= DATE_ADD(
+                DATE_ADD(CURDATE(), INTERVAL 7 - DAYOFWEEK(CURDATE()) DAY),
+                INTERVAL ${offset * 7} DAY
+            )
+
+        -- Agrupa os resultados por dia da semana
         GROUP BY DAYOFWEEK(data), diaSemana
+
+        -- Ordena do domingo ao sábado
         ORDER BY DAYOFWEEK(data);
     `;
 

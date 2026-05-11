@@ -106,8 +106,12 @@ function semana(req, res) {
     // ID do usuário vindo da URL
     var fkUsuario = req.params.fkUsuario;
 
+    // Offset vindo da URL (0 = semana atual, -1 = semana passada, etc.)
+    // Se não informado, usa 0 como padrão
+    var offset = parseInt(req.params.offset) || 0;
+
     // Busca tarefas agrupadas por dia da semana
-    tarefaModel.tarefasPorSemana(fkUsuario)
+    tarefaModel.tarefasPorSemana(fkUsuario, offset)
         .then(resultado => {
             res.json(resultado);
         })

@@ -376,6 +376,16 @@ p {
     color: #493628;
 }
 
+.graphic-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.graphic-header button {
+    background-color: #FFD6E8;
+}
+
 canvas {
     max-width: 100%;
 }

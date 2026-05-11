@@ -28,7 +28,7 @@ router.get("/contagem/:fkUsuario", tarefaController.contarTarefas);
 
 // Rota para dados do gráfico semanal
 // Método: GET (dados vêm pela URL)
-router.get("/semana/:fkUsuario", tarefaController.semana);
+router.get("/semana/:fkUsuario/:offset", tarefaController.semana);
 
 // Rota para dados do gráfico mensal
 // Método: GET (dados vêm pela URL)

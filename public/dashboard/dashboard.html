@@ -76,16 +76,20 @@
 
                 <div class="right">
                     <div class="graphics">
-                    <div class="graphic">
-                        <h3>Tarefas por Semana</h3>
-                        <canvas id="graficoSemana"></canvas>
-                    </div>
+                        <div class="graphic">
+                            <div class="graphic-header">
+                                <button onclick="navegarSemana(-1)">&#8592;</button>
+                                <h3 id="tituloSemana">Semana Atual</h3>
+                                <button onclick="navegarSemana(1)" id="btnProximaSemana" disabled>&#8594;</button>
+                            </div>
+                            <canvas id="graficoSemana"></canvas>
+                        </div>
 
-                    <div class="graphic">
-                        <h3>Tarefas por Mês</h3>
-                        <canvas id="graficoMes"></canvas>
+                        <div class="graphic">
+                            <h3>Tarefas por Mês</h3>
+                            <canvas id="graficoMes"></canvas>
+                        </div>
                     </div>
-                </div>
                 </div>
         </div>
     </div>
@@ -436,19 +440,57 @@
         }
     }
 
+   // Armazena o offset da semana atual (0 = semana corrente)
+    let offsetSemana = 0;
+
+    // Navega entre semanas somando ou subtraindo o offset
+    function navegarSemana(direcao) {
+
+        // Atualiza o offset (não permite ir além da semana atual)
+        offsetSemana += direcao;
+
+        // Recarrega o gráfico com o novo offset
+        carregarGraficoSemana();
+    } 
+    
     // Função responsável por carregar e renderizar o gráfico de tarefas da semana
     function carregarGraficoSemana() {
 
         // Recupera o ID do usuário da sessão
         let fkUsuario = sessionStorage.getItem("ID_USUARIO");
 
-        // let graficoSemana = null;
+        // Calcula as datas de início (domingo) e fim (sábado) da semana exibida
+        const hoje = new Date();
+        const inicioDaSemana = new Date(hoje);
+        inicioDaSemana.setDate(hoje.getDate() - hoje.getDay() + (offsetSemana * 7));
+
+        const fimDaSemana = new Date(inicioDaSemana);
+        fimDaSemana.setDate(inicioDaSemana.getDate() + 6);
+
+        // Formata as datas para DD/MM
+        const formatarData = (data) => {
+            const dia = String(data.getDate()).padStart(2, "0");
+            const mes = String(data.getMonth() + 1).padStart(2, "0");
+            return `${dia}/${mes}`;
+        };
+
+        // Desabilita o botão "próxima" se já estiver na semana atual
+        document.getElementById("btnProximaSemana").disabled = offsetSemana >= 0;
+
+        // Atualiza o título com o intervalo real de datas da semana
+        if (offsetSemana === 0) {
+            document.getElementById("tituloSemana").innerText = 
+                `Semana Atual (${formatarData(inicioDaSemana)} - ${formatarData(fimDaSemana)})`;
+        } else {
+            document.getElementById("tituloSemana").innerText = 
+                `${formatarData(inicioDaSemana)} - ${formatarData(fimDaSemana)}`;
+        }
 
         // Faz a requisição ao backend para buscar os dados da semana
-        fetch(`/tarefas/semana/${fkUsuario}`)
+        fetch(`/tarefas/semana/${fkUsuario}/${offsetSemana}`)
             .then(res => {
 
-                 // Verifica se a resposta foi bem-sucedida
+                // Verifica se a resposta foi bem-sucedida
                 if (!res.ok) throw new Error("Erro ao buscar dados semanais");
 
                 // Converte a resposta para JSON
@@ -473,14 +515,14 @@
                 // Preenche os valores com os dados vindos do backend
                 dados.forEach(item => {
 
-                    // item.diaSemana -> nome do dia (ex: "Seg") item.total -> quantidade de tarefas
+                    // item.diaSemana -> nome do dia (ex: "Seg") | item.total -> quantidade de tarefas
                     valores[item.diaSemana] = item.total;
                 });
 
                 // Garante a ordem correta dos dados conforme o array de dias
                 let dadosOrdenados = nomesDias.map(dia => valores[dia]);
 
-                // Se já existir um gráfico anterior, destrói antes de criar outro(evita erro e sobreposição)
+                // Se já existir um gráfico anterior, destrói antes de criar outro (evita erro e sobreposição)
                 if (window.graficoSemana?.destroy) {
                     window.graficoSemana.destroy();
                 }
