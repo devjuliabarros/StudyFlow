@@ -86,7 +86,7 @@
                         </div>
 
                         <div class="graphic">
-                            <h3>Tarefas por Mês</h3>
+                            <h3>Tarefas Concluídas por Mês em 2026</h3>
                             <canvas id="graficoMes"></canvas>
                         </div>
                     </div>
@@ -539,9 +539,10 @@
                     data: {
                         labels: nomesDias, // rótulos (dias da semana)
                         datasets: [{
-                            label: "Tarefas Concluídas", // legenda
+                            label: "Tarefas Concluídas na Semana", // legenda
                             data: dadosOrdenados, // valores
-                            backgroundColor: "#C5E3FF" // cor das barras
+                            backgroundColor:
+                                "#DDD1FE",
                         }]
                     },
                 });
@@ -589,11 +590,26 @@
                         datasets: [{
                             label: "Tarefas Concluídas",
                             data: valores, // valores por mês
-                            backgroundColor: "#D3EBC5"
+                            backgroundColor: [
+                                "#DDD1FE",
+                                "#C5E3FF",
+                                "#D3EBC5",
+                                "#FCFD96",
+                            ]
                         }]
+                    },
+                
+                // Oculta a legenda do gráfico, já que as informações
+                // são representadas visualmente pelas barras e pelos meses
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
                     }
-                });
+                } 
             });
+        });
     }      
 
 </script>
