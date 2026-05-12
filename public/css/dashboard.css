@@ -349,6 +349,9 @@ p {
     cursor: pointer;
 }
 
+.acoes i {
+    color: #493628;
+}
 /* Gráficos */
 
 .graphics {

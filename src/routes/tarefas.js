@@ -19,6 +19,12 @@ router.get("/listar/:fkUsuario", tarefaController.listar);
 // Método: PUT (atualização)
 router.put("/status", tarefaController.atualizarStatus);
 
+// Rota para editar uma tarefa
+// Método: PUT (atualização)
+router.put("/editar/:id", function (req, res) {
+    tarefaController.editar(req, res);
+});
+
 // Rota para deletar uma tarefa
 // Método: DELETE (deletar)
 router.delete("/:idTarefa", tarefaController.deletar);

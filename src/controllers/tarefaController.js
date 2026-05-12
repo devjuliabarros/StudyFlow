@@ -65,6 +65,30 @@ function atualizarStatus(req, res) {
         .catch(erro => res.status(500).json(erro));
 }
 
+// Editar uma tarefa
+function editar(req, res) {
+    
+    // ID da tarefa recebido pela URL
+    let id = req.params.id;
+
+    // Novos dados enviados pelo frontend
+    let nome = req.body.nome;
+    let disciplina = req.body.disciplina;
+    let data = req.body.data;
+
+    // Chama o model para atualizar a tarefa no banco
+    tarefaModel.editar(id, nome, disciplina, data)
+        .then(() => {
+            res.status(200).send("Tarefa atualizada");
+        })
+        .catch((erro) => {
+            // Exibe o erro no console do servidor
+            console.log(erro);
+            // Retorna erro para o frontend
+            res.status(500).send(erro.sqlMessage);
+        });
+}
+
 // Deletar a tarefa
 function deletar(req, res) {
 
@@ -143,6 +167,7 @@ module.exports = {
     cadastrar,
     listar,
     atualizarStatus,
+    editar,
     deletar,
     contarTarefas,
     semana,

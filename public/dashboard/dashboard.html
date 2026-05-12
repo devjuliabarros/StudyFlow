@@ -200,13 +200,10 @@
                     let status = (tarefa.status || "").trim().toLowerCase();
 
                     if (status === "pendente") {
-                        acao = "➡️ Iniciar";
+                        acao = `<i class="bi bi-play-fill"></i>`;
                     } 
                     else if (status === "andamento") {
-                        acao = "✔ Concluir";
-                    } 
-                    else if (status === "concluido") {
-                        acao = "🔄 Reabrir";
+                        acao = `<i class="bi bi-check-lg"></i>`;
                     }
 
                     // Monta o HTML da tarefa
@@ -221,7 +218,18 @@
                                     ${acao}
                                 </button>
 
-                                <button onclick="deletarTarefa(${tarefa.idTarefa})">🗑️</button>
+                                  <button onclick="
+                                    editarTarefa(
+                                        ${tarefa.idTarefa},
+                                        '${tarefa.nome}',
+                                        '${tarefa.disciplina}',
+                                        '${dataFormatada}'
+                                    )
+                                ">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+
+                                <button onclick="deletarTarefa(${tarefa.idTarefa})"><i class="bi bi-trash2-fill"></i></button>
                             </div>
                         </div>
                     `;
@@ -328,9 +336,19 @@
             return;
         }
 
+        // DEFINE URL E MÉTODO
+        let url = "/tarefas/cadastrar";
+        let metodo = "POST";
+
+        // Se estiver editando
+        if (idTarefaEditando != null) {
+            url = `/tarefas/editar/${idTarefaEditando}`;
+            metodo = "PUT";
+        }
+
         // Envia os dados para o backend via requisição HTTP (POST)
-        fetch("/tarefas/cadastrar", {
-            method: "POST",
+        fetch(url, {
+            method: metodo,
             headers: {
                 "Content-Type": "application/json" // informa que o corpo é JSON
             },
@@ -368,6 +386,23 @@
         });
     }
 
+    // Função responsável por editar uma tarefa
+
+    // Armazena o ID da tarefa que está sendo editada no momento.
+    // Inicialmente começa como null porque nenhuma tarefa foi selecionada.
+    let idTarefaEditando = null;
+    
+    function editarTarefa(id, nome, disciplina, data) {
+
+        idTarefaEditando = id;
+
+        document.getElementById("inputNome").value = nome;
+        document.getElementById("inputDisciplina").value = disciplina;
+        document.getElementById("inputData").value = data;
+
+        document.getElementById("modalTarefa").style.display = "flex";
+    }
+    
     // Função responsável por deletar uma tarefa
     function deletarTarefa(id) {
 
@@ -443,7 +478,7 @@
         }
     }
 
-   // Armazena o offset da semana atual (0 = semana corrente)
+    // Armazena o offset da semana atual (0 = semana corrente)
     let offsetSemana = 0;
 
     // Navega entre semanas somando ou subtraindo o offset

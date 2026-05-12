@@ -46,6 +46,23 @@ function atualizarStatus(idTarefa, status) {
     return database.executar(instrucaoSql);
 }
 
+// Edita as infromações de uma tarefa
+function editar(id, nome, disciplina, data) {
+    
+    // Atualiza as informações da tarefa com base no ID
+    let instrucao = `
+        UPDATE tarefa
+        SET
+            nome = '${nome}',
+            disciplina = '${disciplina}',
+            data = '${data}'
+        WHERE idTarefa = ${id};
+    `;
+
+    // Executa a query no banco
+    return database.executar(instrucao);
+}
+
 // Deleta a tarefa
 function deletar(idTarefa) {
 
@@ -170,6 +187,7 @@ module.exports = {
     cadastrar,
     listarPorUsuario,
     atualizarStatus,
+    editar,
     deletar,
     contarPorStatus,
     tarefasPorSemana,
