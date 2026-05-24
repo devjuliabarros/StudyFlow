@@ -8,6 +8,7 @@ function cadastrar(req, res) {
     var nome = req.body.nome;
     var disciplina = req.body.disciplina;
     var data = req.body.data;
+    var prioridade = req.body.prioridade || "media";
 
     // Define o status inicial da tarefa
     var status = "pendente";
@@ -16,7 +17,7 @@ function cadastrar(req, res) {
     var fkUsuario = req.body.fkUsuario;
 
     // Chama o model para inserir no banco
-    tarefaModel.cadastrar(nome, disciplina, data, status, fkUsuario)
+    tarefaModel.cadastrar(nome, disciplina, data, status, prioridade, fkUsuario)
         .then(() => 
             // Retorna sucesso para o frontend
             res.status(200).send("Tarefa cadastrada")
@@ -75,9 +76,10 @@ function editar(req, res) {
     let nome = req.body.nome;
     let disciplina = req.body.disciplina;
     let data = req.body.data;
+    let prioridade = req.body.prioridade;
 
     // Chama o model para atualizar a tarefa no banco
-    tarefaModel.editar(id, nome, disciplina, data)
+    tarefaModel.editar(id, nome, disciplina, data, prioridade)
         .then(() => {
             res.status(200).send("Tarefa atualizada");
         })

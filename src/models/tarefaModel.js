@@ -2,12 +2,12 @@
 var database = require("../database/config");
 
 // Cadastra uma nova tarefa
-function cadastrar(nome, disciplina, data, status, fkUsuario) {
+function cadastrar(nome, disciplina, data, status, prioridade, fkUsuario) {
     
     // Monta a instrução SQL para inserir uma nova tarefa
     var instrucaoSql = `
         INSERT INTO tarefa (nome, disciplina, data, status, fkUsuario)
-        VALUES ('${nome}', '${disciplina}', '${data}', '${status}', ${fkUsuario});
+        VALUES ('${nome}', '${disciplina}', '${data}', '${status}', '${prioridade}', ${fkUsuario});
     `;
 
     // Executa a query no banco
@@ -24,7 +24,6 @@ function listarPorUsuario(fkUsuario) {
     var instrucaoSql = `
         SELECT * FROM tarefa
         WHERE fkUsuario = ${fkUsuario}
-        AND ativo = 'sim'
         AND status <> 'concluido'
         ORDER BY data;
     `;
@@ -47,7 +46,7 @@ function atualizarStatus(idTarefa, status) {
 }
 
 // Edita as infromações de uma tarefa
-function editar(id, nome, disciplina, data) {
+function editar(id, nome, disciplina, data, prioridade) {
     
     // Atualiza as informações da tarefa com base no ID
     let instrucao = `
@@ -55,7 +54,8 @@ function editar(id, nome, disciplina, data) {
         SET
             nome = '${nome}',
             disciplina = '${disciplina}',
-            data = '${data}'
+            data = '${data}',
+            prioridade = '${prioridade}'
         WHERE idTarefa = ${id};
     `;
 

@@ -14,7 +14,9 @@ CREATE TABLE tarefa (
     disciplina VARCHAR(100),
     data DATE,
     status VARCHAR(20),
-	CHECK (status IN ('pendente', 'andamento', 'concluido')),
+    CHECK (status IN ('pendente', 'andamento', 'concluido')),
+    prioridade VARCHAR(10) DEFAULT 'media',
+    CHECK (prioridade IN ('alta', 'media', 'baixa')),
     fkUsuario INT,
     FOREIGN KEY (fkUsuario) REFERENCES usuario(idUsuario)
 );

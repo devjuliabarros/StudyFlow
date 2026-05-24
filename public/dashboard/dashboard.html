@@ -93,6 +93,7 @@
                 </div>
         </div>
     </div>
+</section>
 
     <!-- Modal de Criar uma Nova Tarefa -->
     <div id="modalTarefa" class="modal">
@@ -101,6 +102,14 @@
 
             <input type="text" id="inputNome" placeholder="Nome">
             <input type="text" id="inputDisciplina" placeholder="Disciplina">
+            <div class="prioridade">
+                <p>Defina a prioridade:</p>
+                <select id="inputPrioridade">
+                    <option value="alta">🔴 Alta</option>
+                    <option value="media" selected>🟡 Média</option>
+                    <option value="baixa">🟢 Baixa</option>
+                </select>
+            </div>
             <input type="date" id="inputData">
 
             <div class="buttons">
@@ -109,7 +118,6 @@
             </div>
         </div>
     </div>
-</section>
 
 </body>
 </html>
@@ -236,15 +244,22 @@
                         avisoPrazo = '<span class="prazo">Atrasada</span>';
                     }
 
+
+                    let corPrioridade = {
+                        alta: "🔴", media: "🟡", baixa: "🟢"
+                    }[tarefa.prioridade] || "🟡";
+
                     // Monta o HTML da tarefa
                     let tarefaHTML = `
                        <div class="tarefa ${tarefa.status}">
+                            <p>${corPrioridade}</p>
                             <p>${tarefa.nome}</p>
                             <p>${tarefa.disciplina}</p>
                             <p>${dataFormatada}</p>
 
                             ${avisoPrazo}
 
+                            
                             <div class="acoes">
                                 <button onclick="toggleStatus(${tarefa.idTarefa}, '${tarefa.status}')">
                                     ${acao}
@@ -255,7 +270,8 @@
                                         ${tarefa.idTarefa},
                                         '${tarefa.nome}',
                                         '${tarefa.disciplina}',
-                                        '${dataFormatada}'
+                                        '${dataFormatada}',
+                                        '${tarefa.prioridade}'
                                     )
                                 ">
                                     <i class="bi bi-pencil-square"></i>
@@ -364,6 +380,7 @@
         // Captura os valores digitados nos inputs
         let nome = document.getElementById("inputNome").value;
         let disciplina = document.getElementById("inputDisciplina").value;
+        let prioridade = document.getElementById("inputPrioridade").value;
         let data = document.getElementById("inputData").value;
 
         // Recupera o ID do usuário armazenado na sessão
@@ -394,6 +411,7 @@
             body: JSON.stringify({
                 nome: nome,
                 disciplina: disciplina,
+                prioridade: prioridade,
                 data: data,
                 fkUsuario: fkUsuario
             })
@@ -431,7 +449,7 @@
     // Inicialmente começa como null porque nenhuma tarefa foi selecionada.
     let idTarefaEditando = null;
     
-    function editarTarefa(id, nome, disciplina, data) {
+    function editarTarefa(id, nome, disciplina, data, prioridade) {
 
         // Armazena o ID da tarefa que será editada
         idTarefaEditando = id;
@@ -441,6 +459,7 @@
 
         document.getElementById("inputNome").value = nome;
         document.getElementById("inputDisciplina").value = disciplina;
+        document.getElementById("inputPrioridade").value = prioridade;
         document.getElementById("inputData").value = data;
 
         document.getElementById("modalTarefa").style.display = "flex";
