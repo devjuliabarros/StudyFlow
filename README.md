@@ -32,6 +32,8 @@ O <b>Study Flow</b> é um sistema web de planejamento de estudos que auxilia est
 
 <img src="public/assets/imgs/readme/7.png" alt=""> <br>
 
+<img src="public/assets/imgs/readme/9.png" alt=""> <br>
+
 <img src="public/assets/imgs/readme/8.png" alt=""> <br>
 
 <h2>| Tecnologias Usadas </h2>
