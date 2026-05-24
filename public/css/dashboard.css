@@ -211,12 +211,46 @@ header a {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin-bottom: 10px;
 }
 
 .task-list .top button {
     color: #493628;
     font-weight: 600;
     background-color: #DDD1FE;
+}
+
+/* Scrollbar nas listas de tarefas */
+
+#tarefasHoje,
+#todasTarefas {
+    max-height: 550px;
+    overflow-y: auto;
+}
+
+#tarefasHoje::-webkit-scrollbar,
+#todasTarefas::-webkit-scrollbar {
+    width: 8px;
+}
+
+#tarefasHoje::-webkit-scrollbar-thumb,
+#todasTarefas::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+}
+
+/* Tarefas Atrasadas */
+
+.atrasada {
+    border-left: 5px solid red;
+}
+
+.prazo {
+    color: red;
+    font-weight: bold;
+    font-size: 12px;
 }
 
 button {

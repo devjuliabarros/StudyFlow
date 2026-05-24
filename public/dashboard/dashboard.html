@@ -97,7 +97,7 @@
     <!-- Modal de Criar uma Nova Tarefa -->
     <div id="modalTarefa" class="modal">
         <div class="modal-content">
-            <h3>Nova Tarefa</h3>
+            <h3 id="tituloModal">Nova Tarefa</h3>
 
             <input type="text" id="inputNome" placeholder="Nome">
             <input type="text" id="inputDisciplina" placeholder="Disciplina">
@@ -183,7 +183,7 @@
                 let divHoje = document.getElementById("tarefasHoje");
                 let divTodas = document.getElementById("todasTarefas");
 
-                 // Limpa o conteúdo atual antes de renderizar novamente
+                // Limpa o conteúdo atual antes de renderizar novamente
                 divHoje.innerHTML = "";
                 divTodas.innerHTML = "";
 
@@ -206,12 +206,44 @@
                         acao = `<i class="bi bi-check-lg"></i>`;
                     }
 
+                    // Define se está atrasada ou não
+                    let atrasada = false;
+
+                    // Só verifica se a tarefa possui data e não está concluída
+                    if (tarefa.data && status !== "concluido") {
+
+                        // Converte a data da tarefa para objeto Date (data real do JS)
+                        let dataTarefa = new Date(tarefa.data);
+
+                        // Pega a data atual
+                        let hojeDate = new Date();
+
+                        // Zera horas, minutos e segundos das duas datas
+                        dataTarefa.setHours(0, 0, 0, 0);
+                        hojeDate.setHours(0, 0, 0, 0);
+
+                        // Se a data da tarefa for menor que a data de hoje significa que o prazo já passou
+                        if (dataTarefa < hojeDate) {
+                            atrasada = true; // Marca a tarefa como atrasada
+                        }
+                    }
+
+                    // Variável que armazenará o aviso de atraso
+                    let avisoPrazo = "";
+
+                    // Se a tarefa estiver atrasada, adiciona o texto
+                    if (atrasada) {
+                        avisoPrazo = '<span class="prazo">Atrasada</span>';
+                    }
+
                     // Monta o HTML da tarefa
                     let tarefaHTML = `
-                        <div class="tarefa ${tarefa.status}">
+                       <div class="tarefa ${tarefa.status}">
                             <p>${tarefa.nome}</p>
                             <p>${tarefa.disciplina}</p>
                             <p>${dataFormatada}</p>
+
+                            ${avisoPrazo}
 
                             <div class="acoes">
                                 <button onclick="toggleStatus(${tarefa.idTarefa}, '${tarefa.status}')">
@@ -295,14 +327,21 @@
 
     // Função responsável por abrir o modal de criação de tarefa
     function abrirModal() {
+
+        // Define que nenhuma tarefa está sendo editada
+        idTarefaEditando = null;
+
         //Limpa os campos
         document.getElementById("inputNome").value = "";
         document.getElementById("inputDisciplina").value = "";
         
+        // Define o Título do Modal
+        document.getElementById("tituloModal").innerText = "Nova Tarefa";
+
         // Seleciona o elemento do modal pelo ID
         // e altera o display para "flex", tornando-o visível na tela
         document.getElementById("modalTarefa").style.display = "flex";
-
+        
         // Obtém a data atual no formato ISO (YYYY-MM-DDTHH:mm:ss)
         // e separa apenas a parte da data (antes do "T")
         let hoje = new Date().toISOString().split("T")[0];
@@ -394,7 +433,11 @@
     
     function editarTarefa(id, nome, disciplina, data) {
 
+        // Armazena o ID da tarefa que será editada
         idTarefaEditando = id;
+
+        // Define o Título do Modal
+        document.getElementById("tituloModal").innerText = "Editar Tarefa";
 
         document.getElementById("inputNome").value = nome;
         document.getElementById("inputDisciplina").value = disciplina;
