@@ -6,7 +6,7 @@ function cadastrar(nome, disciplina, data, status, prioridade, fkUsuario) {
     
     // Monta a instrução SQL para inserir uma nova tarefa
     var instrucaoSql = `
-        INSERT INTO tarefa (nome, disciplina, data, status, fkUsuario)
+        INSERT INTO tarefa (nome, disciplina, data, status, prioridade, fkUsuario)
         VALUES ('${nome}', '${disciplina}', '${data}', '${status}', '${prioridade}', ${fkUsuario});
     `;
 
