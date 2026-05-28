@@ -48,7 +48,7 @@ O <b>Study Flow</b> é um sistema web de planejamento de estudos que auxilia est
 <b>https://github.com/devjuliabarros/StudyFlow.git </b> <br>
 2. Acesse o diretório do projeto no terminal com o comando <b> cd StudyFlow/</b> <br>
 3. Instale todas as dependências necessárias, utilizando o comando <b>npm i</b> ou <b>npm install</b> <br>
-4. Execute o comando<b>npm start</b> <br>
+4. Execute o comando <b>npm start</b> <br>
 5. Acesso o endereço do servidor <b>http://localhost:3333/</b> no seu navegador <br> <br>
 
 | 🩷💡 Desenvolvido por <b>Júlia Barros </b>
