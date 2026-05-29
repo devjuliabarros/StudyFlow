@@ -1,6 +1,5 @@
 // Importa os models (acesso ao banco)
 var usuarioModel = require("../models/usuarioModel");
-// var tarefaModel = require("../models/tarefaModel");
 
 // Autenticar o login do usuario
 function autenticar(req, res) {

@@ -49,7 +49,7 @@ function atualizarStatus(idTarefa, status) {
 function editar(id, nome, disciplina, data, prioridade) {
     
     // Atualiza as informações da tarefa com base no ID
-    let instrucao = `
+    var instrucaoSql = `
         UPDATE tarefa
         SET
             nome = '${nome}',
@@ -60,27 +60,27 @@ function editar(id, nome, disciplina, data, prioridade) {
     `;
 
     // Executa a query no banco
-    return database.executar(instrucao);
+    return database.executar(instrucaoSql);
 }
 
 // Deleta a tarefa
 function deletar(idTarefa) {
 
     // Remove a tarefa do banco
-    var sql = `
+    var instrucaoSql = `
         DELETE FROM tarefa
         WHERE idTarefa = ${idTarefa};
     `;
 
     // Executa a query no banco
-    return database.executar(sql);
+    return database.executar(instrucaoSql);
 }
 
 // Faz a contagem de tarefas conforme o seu status "Pendente", "Em andamento" e "Concluido"
 function contarPorStatus(fkUsuario) {
 
     // Agrupa as tarefas por status e conta quantas existem em cada
-    var sql = `
+    var instrucaoSql = `
         SELECT status, COUNT(*) AS total
         FROM tarefa
         WHERE fkUsuario = ${fkUsuario}
@@ -88,7 +88,7 @@ function contarPorStatus(fkUsuario) {
     `;
 
     // Executa a query no banco
-    return database.executar(sql);
+    return database.executar(instrucaoSql);
 }
 
 // Seleciona as tarefas no banco de dados conforme o dia da semana
@@ -99,7 +99,7 @@ function tarefasPorSemana(fkUsuario, offset = 0) {
     // DAYOFWEEK retorna números de 1 (Domingo) a 7 (Sábado)
     // O CASE converte para nomes (Dom, Seg, etc.)
     // O offset desloca o intervalo de datas para semanas anteriores
-    var sql = `
+    var instrucaoSql = `
         SELECT 
         -- Converte o número do dia da semana para nome abreviado
         -- DAYOFWEEK: 1 = Domingo | 7 = Sábado
@@ -145,7 +145,7 @@ function tarefasPorSemana(fkUsuario, offset = 0) {
     `;
 
     // Executa a query no banco
-    return database.executar(sql);
+    return database.executar(instrucaoSql);
 }
 
 // Seleciona as tarefas no banco de dados conforme o mês
@@ -154,7 +154,7 @@ function tarefasPorMes(fkUsuario) {
     // Agrupa tarefas concluídas por mês
     // MONTH(data) retorna o número do mês (1 a 12)
     // CASE converte para nome do mês
-    var sql = `
+    var instrucaoSql = `
         SELECT 
             CASE 
                 WHEN MONTH(data) = 1 THEN 'Janeiro'
@@ -179,7 +179,7 @@ function tarefasPorMes(fkUsuario) {
     `;
 
     // Executa a query no banco
-    return database.executar(sql);
+    return database.executar(instrucaoSql);
 }
 
 // Exporta todas as funções para uso no controller

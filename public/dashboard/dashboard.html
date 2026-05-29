@@ -124,222 +124,144 @@
 
 <script>
 
-    // Função responsável por obter o ID do usuário armazenado no navegador
-    function getUsuario() {
-    
-    // Acessa o sessionStorage (armazenamento temporário do navegador)
-    // e retorna o valor associado à chave "ID_USUARIO"
-    // Esse valor normalmente foi salvo após o login do usuário
+    window.onload = inicializar;
 
-    return sessionStorage.getItem("ID_USUARIO");
-}
-
-    // Executa funções iniciais após o carregamento completo da página
-    window.addEventListener("load", () => {
-    carregarUsuario();  // Chama a função que carrega os dados do usuário na tela
-    carregarTarefas();  // Chama a função que busca e exibe as tarefas do usuário
-    carregarCards(); // Atualiza os cards (ex: quantidade de tarefas, status, etc.)
-    carregarGraficoSemana(); // Carrega o gráfico com dados da semana
-    carregarGraficoMes(); // Carrega o gráfico com dados do mês
-});
+    function inicializar() {
+        carregarUsuario();
+        carregarTarefas();
+        carregarCards();
+        obterDadosGraficoSemana();
+        obterDadosGraficoMes();
+    }
 
     // Função responsável por carregar o nome do usuário na tela
     function carregarUsuario() {
-        // Recupera o nome do usuário armazenado no sessionStorage
         let nome = sessionStorage.getItem("NOME_USUARIO");
 
-        // Verifica se existe um nome salvo (evita erro ou exibição vazia)
         if (nome) {
-
-            // Seleciona o elemento HTML com id "nomeUsuario"
-            // e insere um texto com o nome do usuário em destaque (negrito)
             document.getElementById("nomeUsuario").innerHTML = 
                 `Olá, <br> <strong>${nome}</strong>`;
         }
-}
+    }
 
     // Função responsável por buscar e exibir as tarefas do usuário
-    function carregarTarefas() {
-
-        // Exibe no console o ID do usuário logado (debug)
-        console.log("USUÁRIO LOGADO:", sessionStorage.getItem("ID_USUARIO"));
-
-        // Recupera o ID do usuário armazenado na sessão
+     function carregarTarefas() {
         let fkUsuario = sessionStorage.getItem("ID_USUARIO");
 
-        // Faz uma requisição para o backend buscando as tarefas do usuário
-        fetch(`/tarefas/listar/${fkUsuario}`)
-            
-            .then(res => {
+        fetch("/tarefas/listar/" + fkUsuario, { cache: 'no-store' })
+            .then(function(response) {
+                if (response.ok) {
+                    response.json().then(function(tarefas) {
+                        console.log("Tarefas recebidas: " + JSON.stringify(tarefas));
 
-                // Verifica se a resposta da requisição foi bem-sucedida
-                if (!res.ok) throw new Error("Erro ao buscar tarefas");
+                        let hoje = new Date().toISOString().split("T")[0];
 
-                 // Converte a resposta para JSON
-                return res.json();
-            })
+                        let divHoje = document.getElementById("tarefasHoje");
 
-            .then(tarefas => {
+                        let divTodas = document.getElementById("todasTarefas");
 
-                // Exibe no console as tarefas recebidas (debug)
-                console.log("TAREFAS:", tarefas);
+                        divHoje.innerHTML = "";
+                        divTodas.innerHTML = "";
 
-                // Pega a data de hoje no formato YYYY-MM-DD
-                let hoje = new Date().toISOString().split("T")[0];
+                        for (let i = 0; i < tarefas.length; i++) {
+                            let tarefa = tarefas[i];
+                            let dataFormatada = "Sem data";
+                            let status = (tarefa.status || "").trim().toLowerCase();
+                            let acao = "";
 
-                // Pega a data de hoje no formato YYYY-MM-DD
-                let divHoje = document.getElementById("tarefasHoje");
-                let divTodas = document.getElementById("todasTarefas");
+                            if (tarefa.data) {
+                                dataFormatada = tarefa.data.split("T")[0];
+                            }
 
-                // Limpa o conteúdo atual antes de renderizar novamente
-                divHoje.innerHTML = "";
-                divTodas.innerHTML = "";
+                            if (status == "pendente") {
+                                acao = '<i class="bi bi-play-fill"></i>';
+                            } else if (status == "andamento") {
+                                acao = '<i class="bi bi-check-lg"></i>';
+                            }
 
-                // Percorre todas as tarefas recebidas
-                tarefas.forEach(tarefa => {
+                            let atrasada = false;
 
-                    // Formata a data da tarefa (ou define como "Sem data")
-                    let dataFormatada = tarefa.data ? tarefa.data.split("T")[0] : "Sem data";
+                            if (tarefa.data && status !== "concluido") {
+                                let dataTarefa = new Date(tarefa.data);
+                                let hojeDate = new Date();
+                                dataTarefa.setHours(0, 0, 0, 0);
+                                hojeDate.setHours(0, 0, 0, 0);
+                                if (dataTarefa < hojeDate) {
+                                    atrasada = true;
+                                }
+                            }
 
-                    // Define o texto do botão com base no status
-                    let acao = "";
+                            let avisoPrazo = "";
 
-                    // Normaliza o status (remove espaços e deixa minúsculo)
-                    let status = (tarefa.status || "").trim().toLowerCase();
+                            if (atrasada) {
+                                avisoPrazo = '<span class="prazo">Atrasada</span>';
+                            }
 
-                    if (status === "pendente") {
-                        acao = `<i class="bi bi-play-fill"></i>`;
-                    } 
-                    else if (status === "andamento") {
-                        acao = `<i class="bi bi-check-lg"></i>`;
-                    }
+                            let cores = { alta: "🔴", media: "🟡", baixa: "🟢" };
+                            let corPrioridade = cores[tarefa.prioridade] || "🟡";
 
-                    // Define se está atrasada ou não
-                    let atrasada = false;
+                            let tarefaHTML = '<div class="tarefa ' + tarefa.status + '">' +
+                                '<p>' + corPrioridade + '</p>' +
+                                '<p>' + tarefa.nome + '</p>' +
+                                '<p>' + tarefa.disciplina + '</p>' +
+                                '<p>' + dataFormatada + '</p>' +
+                                avisoPrazo +
+                                '<div class="acoes">' +
+                                    '<button onclick="toggleStatus(' + tarefa.idTarefa + ', \'' + tarefa.status + '\')">' + acao + '</button>' +
+                                    '<button onclick="editarTarefa(' + tarefa.idTarefa + ', \'' + tarefa.nome + '\', \'' + tarefa.disciplina + '\', \'' + dataFormatada + '\', \'' + tarefa.prioridade + '\')">' +
+                                        '<i class="bi bi-pencil-square"></i>' +
+                                    '</button>' +
+                                    '<button onclick="deletarTarefa(' + tarefa.idTarefa + ')"><i class="bi bi-trash2-fill"></i></button>' +
+                                '</div>' +
+                            '</div>';
 
-                    // Só verifica se a tarefa possui data e não está concluída
-                    if (tarefa.data && status !== "concluido") {
-
-                        // Converte a data da tarefa para objeto Date (data real do JS)
-                        let dataTarefa = new Date(tarefa.data);
-
-                        // Pega a data atual
-                        let hojeDate = new Date();
-
-                        // Zera horas, minutos e segundos das duas datas
-                        dataTarefa.setHours(0, 0, 0, 0);
-                        hojeDate.setHours(0, 0, 0, 0);
-
-                        // Se a data da tarefa for menor que a data de hoje significa que o prazo já passou
-                        if (dataTarefa < hojeDate) {
-                            atrasada = true; // Marca a tarefa como atrasada
+                            divTodas.innerHTML += tarefaHTML;
+                            if (dataFormatada == hoje) {
+                                divHoje.innerHTML += tarefaHTML;
+                            }
                         }
-                    }
-
-                    // Variável que armazenará o aviso de atraso
-                    let avisoPrazo = "";
-
-                    // Se a tarefa estiver atrasada, adiciona o texto
-                    if (atrasada) {
-                        avisoPrazo = '<span class="prazo">Atrasada</span>';
-                    }
-
-
-                    let corPrioridade = {
-                        alta: "🔴", media: "🟡", baixa: "🟢"
-                    }[tarefa.prioridade] || "🟡";
-
-                    // Monta o HTML da tarefa
-                    let tarefaHTML = `
-                       <div class="tarefa ${tarefa.status}">
-                            <p>${corPrioridade}</p>
-                            <p>${tarefa.nome}</p>
-                            <p>${tarefa.disciplina}</p>
-                            <p>${dataFormatada}</p>
-
-                            ${avisoPrazo}
-
-                            
-                            <div class="acoes">
-                                <button onclick="toggleStatus(${tarefa.idTarefa}, '${tarefa.status}')">
-                                    ${acao}
-                                </button>
-
-                                  <button onclick="
-                                    editarTarefa(
-                                        ${tarefa.idTarefa},
-                                        '${tarefa.nome}',
-                                        '${tarefa.disciplina}',
-                                        '${dataFormatada}',
-                                        '${tarefa.prioridade}'
-                                    )
-                                ">
-                                    <i class="bi bi-pencil-square"></i>
-                                </button>
-
-                                <button onclick="deletarTarefa(${tarefa.idTarefa})"><i class="bi bi-trash2-fill"></i></button>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Adiciona a tarefa na lista geral
-                    divTodas.innerHTML += tarefaHTML;
-                    
-                     // Se a tarefa for de hoje, adiciona também na lista "Hoje"
-                    if (dataFormatada === hoje) {
-                        divHoje.innerHTML += tarefaHTML;
-                    }
-                });
+                    });
+                } else {
+                    console.error('Nenhum dado encontrado ou erro na API');
+                }
             })
-            .catch(erro => {
-
-                // Captura e exibe erros no console
-                console.error("Erro ao carregar tarefas:", erro);
+            .catch(function(error) {
+                console.error("Erro ao carregar tarefas: " + error.message);
             });
-}
+    }
 
     // Função responsável por alternar (trocar) o status de uma tarefa
     function toggleStatus(id, statusAtual) {
+        let novoStatus = "";
 
-        // Variável que armazenará o novo status da tarefa
-        let novoStatus;
+        if (statusAtual == "pendente") {
+            novoStatus = "andamento";
+        } else if (statusAtual == "andamento") {
+            novoStatus = "concluido";
+        };
 
-        // Define o próximo status com base no status atual
-        if (statusAtual === "pendente") {
-            novoStatus = "andamento";  // começa a tarefa
-        } else if (statusAtual === "andamento") {
-            novoStatus = "concluido"; // finaliza a tarefa
-        } else {
-            novoStatus = "pendente"; // reinicia a tarefa
-        }
-
-        // Envia uma requisição para o backend para atualizar o status
         fetch("/tarefas/status", {
-            method: "PUT", // método HTTP para atualização
-            headers: {
-                "Content-Type": "application/json"  // informa que está enviando JSON
-            },
-            body: JSON.stringify({
-                idTarefa: id, // ID da tarefa que será atualizada
-                status: novoStatus // novo status definido acima
-            })
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ idTarefa: id, status: novoStatus })
         })
-        .then(res => res.text()) // recebe a resposta do servidor
-        .then(() => {
-
-            // espera um micro delay pra garantir update no banco
-            setTimeout(() => {
-
-                // Recarrega os dados da interface após a atualização
-                carregarTarefas();
-                carregarCards();
-                carregarGraficoSemana();
-                carregarGraficoMes();
-
-            }, 100);
-
+        .then(function(response) {
+            if (response.ok) {
+                console.log("Status atualizado com sucesso");
+                setTimeout(function() {
+                    carregarTarefas();
+                    carregarCards();
+                    obterDadosGraficoSemana();
+                    obterDadosGraficoMes();
+                }, 100);
+            } else {
+                console.error('Erro ao atualizar status');
+            }
+        })
+        .catch(function(error) {
+            console.error("Erro ao atualizar status: " + error.message);
         });
-    }   
+    } 
 
     // Função responsável por abrir o modal de criação de tarefa
     function abrirModal() {
@@ -352,7 +274,7 @@
         document.getElementById("inputDisciplina").value = "";
         
         // Define o Título do Modal
-        document.getElementById("tituloModal").innerText = "Nova Tarefa";
+        document.getElementById("tituloModal").innerHTML = "Nova Tarefa";
 
         // Seleciona o elemento do modal pelo ID
         // e altera o display para "flex", tornando-o visível na tela
@@ -368,94 +290,61 @@
 
     // Função responsável por fechar o modal de tarefa
     function fecharModal() {
-
-        // Seleciona o elemento do modal pelo ID
-        // e altera o display para "none", escondendo-o da tela
         document.getElementById("modalTarefa").style.display = "none";
     }
     
     // Função responsável por coletar os dados do formulário e enviar uma nova tarefa para o backend
     function salvarTarefa() {
-
-        // Captura os valores digitados nos inputs
         let nome = document.getElementById("inputNome").value;
         let disciplina = document.getElementById("inputDisciplina").value;
         let prioridade = document.getElementById("inputPrioridade").value;
         let data = document.getElementById("inputData").value;
-
-        // Recupera o ID do usuário armazenado na sessão
         let fkUsuario = sessionStorage.getItem("ID_USUARIO");
 
-         // Validação simples: verifica se os campos obrigatórios foram preenchidos
         if (!nome || !data) {
             alert("Preencha os campos!");
             return;
         }
 
-        // DEFINE URL E MÉTODO
         let url = "/tarefas/cadastrar";
         let metodo = "POST";
 
-        // Se estiver editando
         if (idTarefaEditando != null) {
-            url = `/tarefas/editar/${idTarefaEditando}`;
+            url = "/tarefas/editar/" + idTarefaEditando;
             metodo = "PUT";
         }
 
-        // Envia os dados para o backend via requisição HTTP (POST)
         fetch(url, {
             method: metodo,
-            headers: {
-                "Content-Type": "application/json" // informa que o corpo é JSON
-            },
-            body: JSON.stringify({
-                nome: nome,
-                disciplina: disciplina,
-                prioridade: prioridade,
-                data: data,
-                fkUsuario: fkUsuario
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nome: nome, disciplina: disciplina, prioridade: prioridade, data: data, fkUsuario: fkUsuario })
         })
-        .then(async res => {
-
-            // Lê a resposta do servidor como texto
-            let texto = await res.text();
-
-            // Exibe a resposta no console (debug)
-            console.log("RESPOSTA DO SERVIDOR:", texto);
-
-            // Se a resposta não for OK, lança um erro
-            if (!res.ok) {
-                throw new Error(texto);
+        .then(function(response) {
+            if (response.ok) {
+                console.log("Tarefa salva com sucesso");
+                fecharModal();
+                carregarTarefas();
+                carregarCards();
+            } else {
+                console.error('Erro ao salvar tarefa');
             }
         })
-        .then(() => {
-
-            // Se deu tudo certo: fecha o modal e atualiza os dados da tela
-            fecharModal();
-            carregarTarefas();
-            carregarCards();
-        })
-        .catch(erro => {
-
-            // Captura e exibe erros no console
-            console.error("Erro:", erro);
+        .catch(function(error) {
+            console.error("Erro ao salvar tarefa: " + error.message);
         });
     }
-
-    // Função responsável por editar uma tarefa
 
     // Armazena o ID da tarefa que está sendo editada no momento.
     // Inicialmente começa como null porque nenhuma tarefa foi selecionada.
     let idTarefaEditando = null;
-    
-    function editarTarefa(id, nome, disciplina, data, prioridade) {
 
+    // Função responsável por editar uma tarefa
+    function editarTarefa(id, nome, disciplina, data, prioridade) {
         // Armazena o ID da tarefa que será editada
         idTarefaEditando = id;
 
         // Define o Título do Modal
-        document.getElementById("tituloModal").innerText = "Editar Tarefa";
+        document.getElementById("tituloModal").innerHTML = "Editar Tarefa";
 
         document.getElementById("inputNome").value = nome;
         document.getElementById("inputDisciplina").value = disciplina;
@@ -467,247 +356,294 @@
     
     // Função responsável por deletar uma tarefa
     function deletarTarefa(id) {
-
-        // Envia uma requisição para o backend informando qual tarefa deve ser removida
         fetch("/tarefas/deletar", {
-            method: "DELETE",  // geralmente usado para atualização (pode ser exclusão lógica)
-            headers: {
-                "Content-Type": "application/json" // indica que está enviando JSON
-            },
-            body: JSON.stringify({ idTarefa: id }) // ID da tarefa que será deletada
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ idTarefa: id })
         })
-        .then(res => res.text()) // recebe a resposta do servidor
-        .then(() => {
-
-            // Após deletar, atualiza os dados na tela
-            carregarTarefas();
-            carregarCards();
-            carregarGraficoSemana();
-            carregarGraficoMes();
+        .then(function(response) {
+            if (response.ok) {
+                console.log("Tarefa deletada com sucesso");
+                carregarTarefas();
+                carregarCards();
+                obterDadosGraficoSemana();
+                obterDadosGraficoMes();
+            } else {
+                console.error('Erro ao deletar tarefa');
+            }
+        })
+        .catch(function(error) {
+            console.error("Erro ao deletar tarefa: " + error.message);
         });
     }
 
-    // Função responsável por buscar e atualizar os cards (quantidade por status)
-    async function carregarCards() {
-        try {
-
-            // Recupera o ID do usuário armazenado na sessão
-            let fkUsuario = sessionStorage.getItem("ID_USUARIO");
-
-            // Faz a requisição ao backend para obter a contagem de tarefas por status
-            const resposta = await fetch(`/tarefas/contagem/${fkUsuario}`);
-
-            // Verifica se a resposta foi bem-sucedida
-            if (!resposta.ok) throw new Error("Contagem falhou");
-
-            // Converte a resposta para JSON
-            const dados = await resposta.json();
-
-            // Exibe os dados no console (debug)
-            console.log("CONTAGEM:", dados);
-
-            // Inicializa os contadores
-            let pendente = 0;
-            let andamento = 0;
-            let concluido = 0;
-
-            // Percorre os dados retornados (cada item representa um status)
-            dados.forEach(item => {
-
-                // Normaliza o status (evita erro com maiúsculas/minúsculas)
-                const status = (item.status || "").toLowerCase();
-
-                // Atribui o total correspondente a cada status
-                if (status === "pendente") pendente = item.total;
-                if (status === "andamento") andamento = item.total;
-                if (status === "concluido") concluido = item.total;
-            });
-
-            // Atualiza os elementos da tela com os valores obtidos
-            document.getElementById("pendentesQtd").innerText = pendente;
-            document.getElementById("andamentoQtd").innerText = andamento;
-            document.getElementById("concluidasQtd").innerText = concluido;
-
-        } catch (err) {
-
-            // Caso ocorra erro, exibe no console
-            console.log("Cards erro:", err);
-
-            // Define os valores como 0 para evitar quebrar a interface
-            document.getElementById("pendentesQtd").innerText = 0;
-            document.getElementById("andamentoQtd").innerText = 0;
-            document.getElementById("concluidasQtd").innerText = 0;
-        }
-    }
-
-    // Armazena o offset da semana atual (0 = semana corrente)
-    let offsetSemana = 0;
-
-    // Navega entre semanas somando ou subtraindo o offset
-    function navegarSemana(direcao) {
-
-        // Atualiza o offset (não permite ir além da semana atual)
-        offsetSemana += direcao;
-
-        // Recarrega o gráfico com o novo offset
-        carregarGraficoSemana();
-    } 
-    
-    // Função responsável por carregar e renderizar o gráfico de tarefas da semana
-    function carregarGraficoSemana() {
-
-        // Recupera o ID do usuário da sessão
+    // Função responsável por buscar e atualizar os cards
+    function carregarCards() {
         let fkUsuario = sessionStorage.getItem("ID_USUARIO");
 
-        // Calcula as datas de início (domingo) e fim (sábado) da semana exibida
-        const hoje = new Date();
-        const inicioDaSemana = new Date(hoje);
-        inicioDaSemana.setDate(hoje.getDate() - hoje.getDay() + (offsetSemana * 7));
+        fetch("/tarefas/contagem/" + fkUsuario, { cache: 'no-store' })
+            .then(function(response) {
+                if (response.ok) {
+                    response.json().then(function(dados) {
+                        console.log("Contagem recebida: " + JSON.stringify(dados));
 
-        const fimDaSemana = new Date(inicioDaSemana);
-        fimDaSemana.setDate(inicioDaSemana.getDate() + 6);
+                        let pendente = 0;
+                        let andamento = 0;
+                        let concluido = 0;
 
-        // Formata as datas para DD/MM
-        const formatarData = (data) => {
-            const dia = String(data.getDate()).padStart(2, "0");
-            const mes = String(data.getMonth() + 1).padStart(2, "0");
-            return `${dia}/${mes}`;
+                        for (let i = 0; i < dados.length; i++) {
+                            let status = (dados[i].status || "").toLowerCase();
+                            if (status == "pendente") pendente = dados[i].total;
+                            if (status == "andamento") andamento = dados[i].total;
+                            if (status == "concluido") concluido = dados[i].total;
+                        }
+
+                        document.getElementById("pendentesQtd").innerHTML = pendente;
+                        document.getElementById("andamentoQtd").innerHTML = andamento;
+                        document.getElementById("concluidasQtd").innerHTML = concluido;
+                    });
+                } else {
+                    console.error('Erro ao buscar contagem');
+                    document.getElementById("pendentesQtd").innerHTML = 0;
+                    document.getElementById("andamentoQtd").innerHTML = 0;
+                    document.getElementById("concluidasQtd").innerHTML = 0;
+                }
+            })
+            .catch(function(error) {
+                console.error("Erro ao carregar cards: " + error.message);
+                document.getElementById("pendentesQtd").innerHTML = 0;
+                document.getElementById("andamentoQtd").innerHTML = 0;
+                document.getElementById("concluidasQtd").innerHTML = 0;
+            });
+    }
+
+    // Função de Navegação entre as semanas no Gráfico Semanal
+    // 0 = semana atual
+    let deslocamentoSemana = 0; 
+    
+    function navegarSemana(direcao) {
+        deslocamentoSemana += direcao;
+        obterDadosGraficoSemana();
+    }
+    
+    // Gráfico Semanal
+    let proximaAtualizacaoSemana;
+
+    function obterDadosGraficoSemana() {
+        let fkUsuario = sessionStorage.getItem("ID_USUARIO");
+
+        let hoje = new Date();
+        
+        let inicioDaSemana = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - hoje.getDay() + (deslocamentoSemana * 7));
+        let fimDaSemana = new Date(inicioDaSemana.getFullYear(), inicioDaSemana.getMonth(), inicioDaSemana.getDate() + 6);
+
+        function formatarData(data) {
+            let dia = String(data.getDate()).padStart(2, "0");
+            let mes = String(data.getMonth() + 1).padStart(2, "0");
+            return dia + "/" + mes;
+        }
+
+        document.getElementById("btnProximaSemana").disabled = deslocamentoSemana >= 0;
+
+        if (deslocamentoSemana == 0) {
+            document.getElementById("tituloSemana").innerHTML = `Semana Atual (${formatarData(inicioDaSemana)} - ${formatarData(fimDaSemana)})`;
+        } else {
+            document.getElementById("tituloSemana").innerHTML = `${formatarData(inicioDaSemana)} - ${formatarData(fimDaSemana)}`;
+        }
+
+        if (proximaAtualizacaoSemana != undefined) {
+            clearTimeout(proximaAtualizacaoSemana);
+        }
+
+        fetch(`/tarefas/semana/${fkUsuario}/${deslocamentoSemana}`, { cache: 'no-store' }).then(function(response) {
+            if (response.ok) {
+                response.json().then(function(resposta) {
+                    console.log(`Dados recebidos: ${JSON.stringify(resposta)}`);
+                    plotarGraficoSemana(resposta);
+                });
+            } else {
+                console.error('Nenhum dado encontrado ou erro na API');
+            }
+        })
+        .catch(function(error) {
+            console.error(`Erro na obtenção dos dados p/ gráfico semanal: ${error.message}`);
+        });
+    }
+
+    function plotarGraficoSemana(resposta) {
+        console.log('iniciando plotagem do gráfico semanal...');
+
+        let nomesDias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+        let valores = { "Dom": 0, "Seg": 0, "Ter": 0, "Qua": 0, "Qui": 0, "Sex": 0, "Sáb": 0 };
+
+        for (let i = 0; i < resposta.length; i++) {
+            valores[resposta[i].diaSemana] = resposta[i].total;
+        }
+
+        let dadosOrdenados = [];
+
+        for (let i = 0; i < nomesDias.length; i++) {
+            dadosOrdenados.push(valores[nomesDias[i]]);
+        }
+
+        let dados = {
+            labels: nomesDias,
+            datasets: [{
+                label: "Tarefas Concluídas na Semana",
+                data: dadosOrdenados,
+                backgroundColor: "#DDD1FE"
+            }]
         };
 
-        // Desabilita o botão "próxima" se já estiver na semana atual
-        document.getElementById("btnProximaSemana").disabled = offsetSemana >= 0;
+        let config = { type: "bar", data: dados };
 
-        // Atualiza o título com o intervalo real de datas da semana
-        if (offsetSemana === 0) {
-            document.getElementById("tituloSemana").innerText = 
-                `Semana Atual (${formatarData(inicioDaSemana)} - ${formatarData(fimDaSemana)})`;
-        } else {
-            document.getElementById("tituloSemana").innerText = 
-                `${formatarData(inicioDaSemana)} - ${formatarData(fimDaSemana)}`;
+        if (window.graficoSemana && window.graficoSemana.destroy) {
+            window.graficoSemana.destroy();
         }
 
-        // Faz a requisição ao backend para buscar os dados da semana
-        fetch(`/tarefas/semana/${fkUsuario}/${offsetSemana}`)
-            .then(res => {
+        window.graficoSemana = new Chart(document.getElementById("graficoSemana"), config);
 
-                // Verifica se a resposta foi bem-sucedida
-                if (!res.ok) throw new Error("Erro ao buscar dados semanais");
-
-                // Converte a resposta para JSON
-                return res.json();
-            })
-            .then(dados => {
-
-                // Array com os nomes dos dias da semana (ordem fixa)
-                const nomesDias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-
-                // Objeto base com valores zerados (garante que todos os dias existam)
-                let valores = {
-                    "Dom": 0,
-                    "Seg": 0,
-                    "Ter": 0,
-                    "Qua": 0,
-                    "Qui": 0,
-                    "Sex": 0,
-                    "Sáb": 0
-                };
-
-                // Preenche os valores com os dados vindos do backend
-                dados.forEach(item => {
-
-                    // item.diaSemana -> nome do dia (ex: "Seg") | item.total -> quantidade de tarefas
-                    valores[item.diaSemana] = item.total;
-                });
-
-                // Garante a ordem correta dos dados conforme o array de dias
-                let dadosOrdenados = nomesDias.map(dia => valores[dia]);
-
-                // Se já existir um gráfico anterior, destrói antes de criar outro (evita erro e sobreposição)
-                if (window.graficoSemana?.destroy) {
-                    window.graficoSemana.destroy();
-                }
-
-                // Obtém o contexto do canvas onde o gráfico será renderizado
-                const ctx = document.getElementById("graficoSemana").getContext("2d");
-
-                // Cria um novo gráfico utilizando Chart.js
-                window.graficoSemana = new Chart(ctx, {
-                    type: "bar",
-                    data: {
-                        labels: nomesDias, // rótulos (dias da semana)
-                        datasets: [{
-                            label: "Tarefas Concluídas na Semana", // legenda
-                            data: dadosOrdenados, // valores
-                            backgroundColor:
-                                "#DDD1FE",
-                        }]
-                    },
-                });
-            })
-            .catch(err => {
-
-                // Exibe erro no console caso a requisição falhe
-                console.error(err);
-            });
+        setTimeout(() => atualizarGraficoSemana(dados, window.graficoSemana), 2000);
     }
 
-    // Armazena a instância do gráfico mensal
-    let graficoMes = null;
-
-    // Função responsável por carregar e renderizar o gráfico mensal
-    function carregarGraficoMes() {
-
-        // Recupera o ID do usuário da sessão
+    function atualizarGraficoSemana(dados, myChart) {
         let fkUsuario = sessionStorage.getItem("ID_USUARIO");
 
-        // Faz a requisição ao backend para buscar os dados do mês
-        fetch(`/tarefas/mes/${fkUsuario}`)
-            .then(res => res.json()) // converte a resposta para JSON
-            .then(dados => {
+        fetch(`/tarefas/semana/${fkUsuario}/${deslocamentoSemana}`, { cache: 'no-store' }).then(function(response) {
+            if (response.ok) {
+                response.json().then(function(novosDados) {
+                    console.log(`Dados atualizados semana: ${JSON.stringify(novosDados)}`);
 
-                // Garante que os dados são um array (evita erro)
-                const lista = Array.isArray(dados) ? dados : [];
-
-                // Extrai os meses (labels do gráfico)
-                const labels = lista.map(i => i.mes);
-
-                // Extrai os valores (quantidade de tarefas)
-                const valores = lista.map(i => i.total);
-
-                // Se já existir um gráfico, destrói antes de criar outro
-                if (graficoMes) {
-                    graficoMes.destroy();
-                }
-
-                // Cria o gráfico com Chart.js
-                graficoMes = new Chart(document.getElementById("graficoMes"), {
-                    type: "bar",
-                    data: {
-                        labels, // meses
-                        datasets: [{
-                            label: "Tarefas Concluídas",
-                            data: valores, // valores por mês
-                            backgroundColor: [
-                                "#DDD1FE",
-                                "#C5E3FF",
-                                "#D3EBC5",
-                                "#FCFD96",
-                            ]
-                        }]
-                    },
-                
-                // Oculta a legenda do gráfico, já que as informações
-                // são representadas visualmente pelas barras e pelos meses
-                options: {
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
+                    if (myChart !== window.graficoSemana) {
+                        console.log("Gráfico substituído, cancelando atualização.");
+                        return;
                     }
-                } 
-            });
-        });
-    }      
 
+                    let nomesDias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+                    let valores = { "Dom": 0, "Seg": 0, "Ter": 0, "Qua": 0, "Qui": 0, "Sex": 0, "Sáb": 0 };
+
+                    for (let i = 0; i < novosDados.length; i++) {
+                        valores[novosDados[i].diaSemana] = novosDados[i].total;
+                    }
+
+                    let dadosOrdenados = [];
+
+                    for (let i = 0; i < nomesDias.length; i++) {
+                        dadosOrdenados.push(valores[nomesDias[i]]);
+                    }
+
+                    dados.datasets[0].data = dadosOrdenados;
+                    myChart.update();
+
+                    proximaAtualizacaoSemana = setTimeout(() => atualizarGraficoSemana(dados, myChart), 2000);
+                });
+            } else {
+                console.error('Nenhum dado encontrado ou erro na API');
+                proximaAtualizacaoSemana = setTimeout(() => atualizarGraficoSemana(dados, myChart), 2000);
+            }
+        })
+        .catch(function(error) {
+            console.error(`Erro na atualização do gráfico semanal: ${error.message}`);
+        });
+    }
+
+    // Gráfico Mensal
+    let proximaAtualizacaoMes;
+
+    function obterDadosGraficoMes() {
+        let fkUsuario = sessionStorage.getItem("ID_USUARIO");
+
+        if (proximaAtualizacaoMes != undefined) {
+            clearTimeout(proximaAtualizacaoMes);
+        }
+
+        fetch(`/tarefas/mes/${fkUsuario}`, { cache: 'no-store' }).then(function(response) {
+            if (response.ok) {
+                response.json().then(function(resposta) {
+                    console.log(`Dados recebidos mês: ${JSON.stringify(resposta)}`);
+                    plotarGraficoMes(resposta);
+                });
+            } else {
+                console.error('Nenhum dado encontrado ou erro na API');
+            }
+        })
+        .catch(function(error) {
+            console.error(`Erro na obtenção dos dados p/ gráfico mensal: ${error.message}`);
+        });
+    }
+
+    function plotarGraficoMes(resposta) {
+        console.log('iniciando plotagem do gráfico mensal...');
+
+        let lista = Array.isArray(resposta) ? resposta : [];
+
+        let labels = [];
+        let valores = [];
+
+        for (let i = 0; i < lista.length; i++) {
+            labels.push(lista[i].mes);
+            valores.push(lista[i].total);
+        }
+
+        let dados = {
+            labels: labels,
+            datasets: [{
+                label: "Tarefas Concluídas",
+                data: valores,
+                backgroundColor: ["#DDD1FE", "#C5E3FF", "#D3EBC5", "#FCFD96"]
+            }]
+        };
+
+        let config = {
+            type: "bar",
+            data: dados,
+            options: {
+                plugins: { legend: { display: false } }
+            }
+        };
+
+        if (window.graficoMes && window.graficoMes.destroy) {
+            window.graficoMes.destroy();
+        }
+
+        window.graficoMes = new Chart(document.getElementById("graficoMes"), config);
+
+        setTimeout(() => atualizarGraficoMes(dados, window.graficoMes), 2000);
+    }
+
+    function atualizarGraficoMes(dados, myChart) {
+        let fkUsuario = sessionStorage.getItem("ID_USUARIO");
+
+        fetch(`/tarefas/mes/${fkUsuario}`, { cache: 'no-store' }).then(function(response) {
+            if (response.ok) {
+                response.json().then(function(novosDados) {
+                    console.log(`Dados atualizados mês: ${JSON.stringify(novosDados)}`);
+
+                    let lista = Array.isArray(novosDados) ? novosDados : [];
+
+                    let labels = [];
+                    let valores = [];
+
+                    for (let i = 0; i < lista.length; i++) {
+                        labels.push(lista[i].mes);
+                        valores.push(lista[i].total);
+                    }
+
+                    dados.labels = labels;
+                    dados.datasets[0].data = valores;
+                    myChart.update();
+
+                    proximaAtualizacaoMes = setTimeout(() => atualizarGraficoMes(dados, myChart), 2000);
+                });
+            } else {
+                console.error('Nenhum dado encontrado ou erro na API');
+                proximaAtualizacaoMes = setTimeout(() => atualizarGraficoMes(dados, myChart), 2000);
+            }
+        })
+        .catch(function(error) {
+            console.error(`Erro na atualização do gráfico mensal: ${error.message}`);
+        });
+    }
 </script>
 

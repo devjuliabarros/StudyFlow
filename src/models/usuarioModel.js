@@ -35,19 +35,19 @@ function atualizar(idUsuario, nome, email, senha) {
     if (senha) campos.push(`senha = '${senha}'`);
 
     // Se não tiver nada pra atualizar
-    if (campos.length === 0) {
+    if (campos.length == 0) {
         return Promise.reject("Nenhum campo para atualizar");
     }
 
     // Monta o SQL final
-    const instrucao = `
+    var instrucaoSql = `
         UPDATE usuario 
         SET ${campos.join(", ")}
         WHERE idUsuario = ${idUsuario};
     `;
 
     // Executa no banco
-    return database.executar(instrucao);
+    return database.executar(instrucaoSql);
 }
 
 module.exports = {
